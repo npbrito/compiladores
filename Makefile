@@ -13,6 +13,7 @@ FILES=\
 		src/main.c \
 		src/hash.c \
 		src/stack.c \
+		src/list.c \
 		src/tree.c 
 
 .PHONY: all

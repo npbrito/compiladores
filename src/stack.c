@@ -11,9 +11,6 @@
 
 #include "stack.h"
 
-/* Natália Brito | 00274727 */
-/* Yuri Jaschek  | 00231592 */
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,5 +50,4 @@ HashTable* pop(StackNode** root){
 HashTable* top(StackNode* root){
     return root->symbol_table; 
 }
-
 

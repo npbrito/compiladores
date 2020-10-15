@@ -3,8 +3,10 @@ int globalvar;
 char hgiuhiauhda;
 char vet[5];
 
-int d, x, y;
+int d, x, y, f, s, j, a, b, c;
 
 int main(){
-
+    int h, i, j, k, l;
+    int j;
+    int gbs;
 }

@@ -8,6 +8,7 @@
 #include "tree.h"
 #include "hash.h"
 #include "stack.h"
+#include "list.h"
 
 void yyerror(char const *s);
 void replace_name(lexeme_t *lex, const char *str);
@@ -15,6 +16,7 @@ extern int yylex(void);
 extern int yylineno;
 extern void *arvore;
 StackNode* global_scope = NULL;
+ElementList* var_list = NULL;
 hash_element* stored_element = NULL;
 extern HashTable * table;
 
@@ -238,14 +240,18 @@ ParamCallList: Expr                   { $$ = $1;               }
 
 /* Global variable declaration */
 GlobalVarDecl: TypeStatic GlobalVarList { HashTable *table = top(global_scope);
-                                        hash_insert(&table, stored_element, $1);
+                                            while(!isEmpty_stack_list(var_list)){
+                                            hash_element* element = pop_element(&var_list);
+                                            hash_insert(&table, element, $1);}
                                         }
              ;
 GlobalVarList: GlobalVar                   {}
              | GlobalVar ',' GlobalVarList {}
              ;
-GlobalVar: ID      {store_nature(&stored_element, 0);}
-         | ID '[' TK_LIT_INT ']' {store_nature(&stored_element, 1); }
+GlobalVar: ID      {store_nature(&stored_element, 0);
+                    push_element(&var_list, stored_element);}
+         | ID '[' TK_LIT_INT ']' {store_nature(&stored_element, 1); 
+         push_element(&var_list, stored_element);}
          ;
 
 /* Local variable declaration */
