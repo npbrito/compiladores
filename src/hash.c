@@ -4,4 +4,125 @@
  * Date  : 2020-10-14
  * ------------------------------------------------ */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
 #include "hash.h"
+
+
+HashTable* hash_create(){
+    HashTable* table = (HashTable*)calloc(HASH_SIZE, sizeof(HashTable));
+    if (!table) {
+        puts("Unable to allocate memory");
+        exit(1);
+    }
+    // Initialize INDEXES
+    for(int i = 0; i < HASH_SIZE; i++){
+        table[i].key = -1;
+    }
+    table[0].occuped = 0;
+    return table;
+}
+
+void hash_insert(HashTable** root, hash_element* newElement){
+    HashTable* table = *root;
+
+    if(table->occuped < HASH_SIZE){
+    int index;
+    char* varname = newElement->name;
+
+    table->occuped++;
+    
+    index = calc_index(varname);
+    
+    while (table[index].value != NULL)
+    {
+        index++;
+    }
+    table[index].key = index;
+    
+    table[index].value = (hash_element*)calloc(1, sizeof(hash_element));
+    //memset(table[index].value, 0, sizeof(hash_element));
+    
+    table[index].value->name = varname;
+    table[index].value->line = newElement->line;
+    table[index].value->nature = newElement->nature;
+    table[index].value->type = newElement->type;
+    table[index].value->type_size = calc_type_size(newElement->type);
+
+    *root = table;
+    }
+    else{
+        fprintf(stderr,"Insufficient memory to allocate '%s'\n", newElement->name);
+    }
+}
+
+int hash_search(HashTable* table, char* name){
+   int index = calc_index(name);
+   int elements_searched = 0;
+
+   while(table[index].value != NULL && elements_searched < HASH_SIZE){
+        if(strcmp(name, table[index].value->name) == 0)
+            return 1 ;
+        if(index < HASH_SIZE){
+            index++;
+        }
+        else
+        {
+            index = 0;
+        }
+            elements_searched++;        
+   }
+    return 0; 
+}
+
+void hash_print(HashTable* table){
+    int i;
+    printf("\n=========================================================================================\n");
+    for(i=0; i<HASH_SIZE; i++){
+        if(table[i].key >=0 ){
+            fprintf(stderr, "[%d]\t| NAME %s \t",table[i].key, table[i].value->name);
+            fprintf(stderr, "| LOCATION %d \t| NATURE %d\t",table[i].value->line, table[i].value->nature);
+            fprintf(stderr, "| TYPE %d \t | TYPE SIZE %d \t\n",table[i].value->type, table[i].value->type_size);
+        }
+        else{
+        fprintf(stderr, "[%d]\t| EMPTY \n", i);   
+        }
+    
+    }
+	printf("=========================================================================================\n");    
+        
+}
+
+int calc_index(char str[]){
+    /* Calculation method of:
+     * https://cp-algorithms.com/string/string-hashing.html */
+    int hash_index = 1;
+    int p_pow = 1;
+    int count;
+    for(count = 0; count < strlen(str); count++){
+        hash_index = (hash_index + (str[count] - 'a' + 1) * p_pow) % HASH_SIZE;
+        p_pow = (p_pow * 31) % HASH_SIZE;
+    }
+    return (hash_index - 1 < 0)? 0 : hash_index - 1;
+}
+
+int calc_type_size(int type){
+    int size = 0;
+    switch (type)
+    {
+    case 258: size = sizeof(int);
+        break;
+    case 259: size = sizeof(float);
+        break;
+    case 260:  size = sizeof(bool);
+        break;
+    case 261: size = sizeof(char);
+        break;
+    case 262: size = sizeof(char*);
+        break;
+    }
+    return size;
+} 
