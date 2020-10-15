@@ -258,16 +258,25 @@ GlobalVar: ID      {store_nature(&stored_element, 0);
 LocalVarDecl: 
              TypeStaticConst LocalVarList { $$ = $2; 
                                         HashTable *table = top(global_scope);
-                                        hash_insert(&table, stored_element, $1);
+                                        while(!isEmpty_stack_list(var_list)){
+                                            hash_element* element = pop_element(&var_list);
+                                            hash_insert(&table, element, $1);
                                         }
+             }
             ;
 LocalVarList: LocalVar                  { $$ = $1;                                     }
             | LocalVar ',' LocalVarList { $$ = ($1) == NULL ? ($3) : add_node($1, $3); }
             ;
 LocalVar: 
-        TK_IDENTIFICADOR                      { stored_element = store_identificador($1); $$ = NULL;}
-        | ID TK_OC_LE IDArray { $$ = create_node($2, 2, $1, $3); }
-        | ID TK_OC_LE Lit     { $$ = create_node($2, 2, $1, $3); }
+        TK_IDENTIFICADOR                      { stored_element = store_identificador($1); $$ = NULL;
+                                                store_nature(&stored_element, 0);
+                                                push_element(&var_list, stored_element);}
+        | ID TK_OC_LE IDArray { $$ = create_node($2, 2, $1, $3);
+                                store_nature(&stored_element, 0);
+                                push_element(&var_list, stored_element);}
+        | ID TK_OC_LE Lit     { $$ = create_node($2, 2, $1, $3); 
+                                store_nature(&stored_element, 0);
+                                push_element(&var_list, stored_element);}
         ;
 
 /***************
