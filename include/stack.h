@@ -27,7 +27,7 @@ int isEmpty( StackNode*);
 void push(StackNode**, HashTable*);
 
 /* Removes the item from the top of the stack */
-HashTable* pop();
+HashTable* pop(StackNode**);
 
 /* Returns the element at the top of the stack */
 HashTable* top(StackNode*);

@@ -26,9 +26,10 @@ HashTable* hash_create(){
     return table;
 }
 
-void hash_insert(HashTable** root, hash_element* newElement){
+void hash_insert(HashTable** root, lexeme_t* newElement, int type){
     HashTable* table = *root;
 
+   fprintf(stderr,"%s\n", newElement->name);
     if(table->occuped < HASH_SIZE){
     int index;
     char* varname = newElement->name;
@@ -44,11 +45,10 @@ void hash_insert(HashTable** root, hash_element* newElement){
     table[index].key = index;
     
     table[index].value = (hash_element*)calloc(1, sizeof(hash_element));
-    //memset(table[index].value, 0, sizeof(hash_element));
     
     table[index].value->name = varname;
     table[index].value->line = newElement->line;
-    table[index].value->nature = newElement->nature;
+    //table[index].value->nature = newElement->nature;
     table[index].value->type = newElement->type;
     table[index].value->type_size = calc_type_size(newElement->type);
 
@@ -62,7 +62,6 @@ void hash_insert(HashTable** root, hash_element* newElement){
 int hash_search(HashTable* table, char* name){
    int index = calc_index(name);
    int elements_searched = 0;
-
    while(table[index].value != NULL && elements_searched < HASH_SIZE){
         if(strcmp(name, table[index].value->name) == 0)
             return 1 ;
@@ -80,7 +79,7 @@ int hash_search(HashTable* table, char* name){
 
 void hash_print(HashTable* table){
     int i;
-    printf("\n=========================================================================================\n");
+    fprintf(stderr,"\n=========================================================================================\n");
     for(i=0; i<HASH_SIZE; i++){
         if(table[i].key >=0 ){
             fprintf(stderr, "[%d]\t| NAME %s \t",table[i].key, table[i].value->name);
@@ -92,7 +91,7 @@ void hash_print(HashTable* table){
         }
     
     }
-	printf("=========================================================================================\n");    
+	fprintf(stderr,"=========================================================================================\n");    
         
 }
 

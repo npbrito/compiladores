@@ -7,6 +7,8 @@
 #ifndef HASH_H_
 #define HASH_H_
 
+#include "tree.h"
+
 // Hash table size 
 #define HASH_SIZE 10
 
@@ -27,11 +29,11 @@ typedef struct HashTable{
 
 } HashTable;
 
-/* Create a hash table */
+/* Create a empty hash table */
 HashTable* hash_create();
 
 /* Insert elelement hash_element* to a table */
-void hash_insert(HashTable**, hash_element*);
+void hash_insert(HashTable**, lexeme_t*, int);
 
 /* Search if element exist in a table */
 int hash_search(HashTable*, char*);

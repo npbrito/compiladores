@@ -12,11 +12,16 @@ DIR=include/
 FILES=\
 		src/main.c \
 		src/hash.c \
-		src/stack.c 
+		src/stack.c \
+		src/tree.c 
 
 .PHONY: all
 all:
-	$(CC) -I$(DIR) $(FILES) -o $(ETAPA)
+	bison -d parser.y
+	scp parser.tab.h $(DIR)
+	flex scanner.l
+	$(CC) -c -I $(DIR) $(FILES) lex.yy.c parser.tab.c  -ll
+	$(CC) -o $(ETAPA) *.o -lfl
 
 .PHONY: run
 run:
@@ -24,4 +29,4 @@ run:
 
 .PHONY: clean
 clean:
-	rm -f *.o  $(ETAPA)
+	rm -f lex.yy.c parser.tab.c parser.tab.h  *.o  $(ETAPA)
