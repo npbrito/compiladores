@@ -27,11 +27,22 @@ typedef struct HashTable{
 
 } HashTable;
 
+/* Create a hash table */
 HashTable* hash_create();
+
+/* Insert elelement hash_element* to a table */
 void hash_insert(HashTable**, hash_element*);
+
+/* Search if element exist in a table */
 int hash_search(HashTable*, char*);
+
+/* Print a entire hash table */
 void hash_print(HashTable*);
+
+/* Calculates a insertion location */
 int calc_index(char*);
+
+/* Return the sizeof of that type */
 int calc_type_size(int);
 
 #endif // HASH_H_

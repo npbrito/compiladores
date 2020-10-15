@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "hash.h"
+#include "stack.h"
 
 int main(int argc, char **argv){
    
@@ -23,7 +24,18 @@ int main(int argc, char **argv){
     if(!hash_search(table, fisrt->name))
     hash_insert(&table, fisrt);
 
-    hash_print(table);
+    // STACK USAGE
+    StackNode* root = create_stack(&table);
+    
+    table = hash_create();
 
+    push(&root, table);
+
+    hash_print(top(root));
+
+    pop(&root);
+
+    hash_print(top(root));
+    
     return 0; 
 }

@@ -11,7 +11,8 @@ ETAPA=etapa4
 DIR=include/
 FILES=\
 		src/main.c \
-		src/hash.c 
+		src/hash.c \
+		src/stack.c 
 
 .PHONY: all
 all:
