@@ -14,11 +14,16 @@
 
 // Store the values of the hash table elements
 typedef struct hash_element{
+    // Non-function
     char* name;
     int line;
     int nature;
     int type;
     int type_size;
+    // For functions
+    
+    int args;
+
 } hash_element;
 
 // A table that contains: a key and an element
@@ -33,7 +38,7 @@ typedef struct HashTable{
 HashTable* hash_create();
 
 /* Insert elelement hash_element* to a table */
-void hash_insert(HashTable**, lexeme_t*, int);
+void hash_insert(HashTable**, hash_element*, int);
 
 /* Search if element exist in a table */
 int hash_search(HashTable*, char*);
@@ -47,4 +52,12 @@ int calc_index(char*);
 /* Return the sizeof of that type */
 int calc_type_size(int);
 
+hash_element*  store_identificador(lexeme_t*);
+
+/* variables : 0
+ * vectors : 1
+ * literals : 2
+ * functions : 3
+ */
+void store_nature(hash_element**, int nature);
 #endif // HASH_H_

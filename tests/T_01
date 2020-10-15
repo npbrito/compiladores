@@ -1,13 +1,10 @@
 int globalvar;
 
 char hgiuhiauhda;
+char vet[5];
 
-int dgyagyudaguyd;
+int d, x, y;
 
 int main(){
-    int localvar1;
-    int localvar2;
-    int localvar3;
-    int localvar4;
-    int localvar5;
+
 }

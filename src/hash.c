@@ -10,7 +10,9 @@
 #include <stdbool.h>
 
 #include "hash.h"
+#include "parser.tab.h"
 
+int stored_nature = 0;
 
 HashTable* hash_create(){
     HashTable* table = (HashTable*)calloc(HASH_SIZE, sizeof(HashTable));
@@ -26,12 +28,11 @@ HashTable* hash_create(){
     return table;
 }
 
-void hash_insert(HashTable** root, lexeme_t* newElement, int type){
+void hash_insert(HashTable** root, hash_element* newElement, int type){
     HashTable* table = *root;
-
-   fprintf(stderr,"%s\n", newElement->name);
+    // Check if table is full
     if(table->occuped < HASH_SIZE){
-    int index;
+    int index = 1;
     char* varname = newElement->name;
 
     table->occuped++;
@@ -44,13 +45,9 @@ void hash_insert(HashTable** root, lexeme_t* newElement, int type){
     }
     table[index].key = index;
     
-    table[index].value = (hash_element*)calloc(1, sizeof(hash_element));
-    
-    table[index].value->name = varname;
-    table[index].value->line = newElement->line;
-    //table[index].value->nature = newElement->nature;
-    table[index].value->type = newElement->type;
-    table[index].value->type_size = calc_type_size(newElement->type);
+    table[index].value = newElement;
+    table[index].value->type = type;
+    table[index].value->type_size = calc_type_size(type);
 
     *root = table;
     }
@@ -112,16 +109,33 @@ int calc_type_size(int type){
     int size = 0;
     switch (type)
     {
-    case 258: size = sizeof(int);
+    case TK_PR_INT: size = sizeof(int);
         break;
-    case 259: size = sizeof(float);
+    case TK_PR_FLOAT: size = sizeof(float);
         break;
-    case 260:  size = sizeof(bool);
+    case TK_PR_BOOL:  size = sizeof(bool);
         break;
-    case 261: size = sizeof(char);
+    case TK_PR_CHAR: size = sizeof(char);
         break;
-    case 262: size = sizeof(char*);
+    case TK_PR_STRING: size = sizeof(char*);
         break;
     }
     return size;
 } 
+
+hash_element* store_identificador(lexeme_t* id){
+    hash_element* stored = (hash_element*)malloc(sizeof(hash_element));
+    stored->name = id->name;
+    stored->line = id->line;
+    stored->type = id-> type;
+    if(stored->nature == 3){
+       stored->args = 0;
+    }
+    return stored;
+}
+
+void store_nature(hash_element** stored, int nature){
+        hash_element* aux = *stored;
+        aux->nature = nature;
+        *stored = aux;
+}

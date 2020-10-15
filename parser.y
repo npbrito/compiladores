@@ -14,7 +14,8 @@ void replace_name(lexeme_t *lex, const char *str);
 extern int yylex(void);
 extern int yylineno;
 extern void *arvore;
-StackNode * global_scope = NULL;
+StackNode* global_scope = NULL;
+hash_element* stored_element = NULL;
 extern HashTable * table;
 
 %}
@@ -168,11 +169,13 @@ Program: %empty                    { $$ = NULL;             }
  * BASIC DEFINITIONS *
  *********************/
 
-ID: TK_IDENTIFICADOR { $$ = create_node($1, 0);}
+ID: TK_IDENTIFICADOR { stored_element = store_identificador($1); 
+                        $$ = create_node($1, 0);
+                    }
   ;
 IDArray: ID              { $$ = $1;                             }
        | ID '[' Expr ']' { replace_name($2, "[]");
-                           $$ = create_node($2, 2, $1, $3);     }
+                           $$ = create_node($2, 2, $1, $3);}
        ;
 Lit: TK_LIT_INT    { $$ = create_node($1, 0);}
    | TK_LIT_FLOAT  { $$ = create_node($1, 0);}
@@ -235,24 +238,28 @@ ParamCallList: Expr                   { $$ = $1;               }
 
 /* Global variable declaration */
 GlobalVarDecl: TypeStatic GlobalVarList { HashTable *table = top(global_scope);
-                                        hash_insert(&table, $2, $1);}
+                                        hash_insert(&table, stored_element, $1);
+                                        }
              ;
 GlobalVarList: GlobalVar                   {}
              | GlobalVar ',' GlobalVarList {}
              ;
-GlobalVar: TK_IDENTIFICADOR             {}
-         | TK_IDENTIFICADOR '[' TK_LIT_INT ']' { }
+GlobalVar: ID      {store_nature(&stored_element, 0);}
+         | ID '[' TK_LIT_INT ']' {store_nature(&stored_element, 1); }
          ;
 
 /* Local variable declaration */
 LocalVarDecl: 
-             TypeStaticConst LocalVarList { $$ = $2; }
+             TypeStaticConst LocalVarList { $$ = $2; 
+                                        HashTable *table = top(global_scope);
+                                        hash_insert(&table, stored_element, $1);
+                                        }
             ;
 LocalVarList: LocalVar                  { $$ = $1;                                     }
             | LocalVar ',' LocalVarList { $$ = ($1) == NULL ? ($3) : add_node($1, $3); }
             ;
 LocalVar: 
-        ID                      { destroy_node($1); $$ = NULL;     }
+        TK_IDENTIFICADOR                      { stored_element = store_identificador($1); $$ = NULL;}
         | ID TK_OC_LE IDArray { $$ = create_node($2, 2, $1, $3); }
         | ID TK_OC_LE Lit     { $$ = create_node($2, 2, $1, $3); }
         ;
@@ -308,7 +315,7 @@ UnarySet: '+' UnaryExpr UnarySet { $$ = create_node($1, 1, $2, $3); }
  ************/
 CreateScope: '{' { push(&global_scope, hash_create());}
             ;
-DestroyScope: '}' { pop(&global_scope); hash_print(top(global_scope));}
+DestroyScope: '}' { hash_print(top(global_scope)); pop(&global_scope); hash_print(top(global_scope));}
                 ;
 
 Cmd: LocalVarDecl            { $$ = $1;                         }
