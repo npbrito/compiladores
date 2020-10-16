@@ -31,6 +31,7 @@ HashTable* hash_create(){
 void hash_insert(HashTable** root, hash_element* newElement, int type){
     HashTable* table = *root;
     // Check if table is full
+
     if(table->occuped < HASH_SIZE){
     int index = 1;
     char* varname = newElement->name;
@@ -89,7 +90,7 @@ void hash_print(HashTable* table){
     
     }
 	fprintf(stderr,"=========================================================================================\n");    
-        
+    
 }
 
 int calc_index(char str[]){
@@ -122,20 +123,3 @@ int calc_type_size(int type){
     }
     return size;
 } 
-
-hash_element* store_identificador(lexeme_t* id){
-    hash_element* stored = (hash_element*)malloc(sizeof(hash_element));
-    stored->name = id->name;
-    stored->line = id->line;
-    stored->type = id-> type;
-    if(stored->nature == 3){
-       stored->args = 0;
-    }
-    return stored;
-}
-
-void store_nature(hash_element** stored, int nature){
-        hash_element* aux = *stored;
-        aux->nature = nature;
-        *stored = aux;
-}

@@ -20,9 +20,11 @@ typedef struct hash_element{
     int nature;
     int type;
     int type_size;
+    union Literal val;
     // For functions
-    
     int args;
+    char* arg_name;
+    int arg_type;
 
 } hash_element;
 
@@ -52,12 +54,4 @@ int calc_index(char*);
 /* Return the sizeof of that type */
 int calc_type_size(int);
 
-hash_element*  store_identificador(lexeme_t*);
-
-/* variables : 0
- * vectors : 1
- * literals : 2
- * functions : 3
- */
-void store_nature(hash_element**, int nature);
 #endif // HASH_H_

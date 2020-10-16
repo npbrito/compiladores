@@ -14,6 +14,7 @@ FILES=\
 		src/hash.c \
 		src/stack.c \
 		src/list.c \
+		src/misc.c \
 		src/tree.c 
 
 .PHONY: all

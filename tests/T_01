@@ -1,12 +1,9 @@
-int globalvar;
-
-char hgiuhiauhda;
-char vet[5];
-
-int d, x, y, f, s, j, a, b, c;
+int ggg;
 
 int main(){
-    int h, i, j, k, l;
-    int j;
-    int gbs;
+    int j <= 5;
+    int k <= 3;
+    int l <= 2;
 }
+
+int kkkk;

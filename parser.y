@@ -9,6 +9,7 @@
 #include "hash.h"
 #include "stack.h"
 #include "list.h"
+#include "misc.h"
 
 void yyerror(char const *s);
 void replace_name(lexeme_t *lex, const char *str);
@@ -18,6 +19,7 @@ extern void *arvore;
 StackNode* global_scope = NULL;
 ElementList* var_list = NULL;
 hash_element* stored_element = NULL;
+hash_element* stored_fun = NULL;
 extern HashTable * table;
 
 %}
@@ -112,6 +114,7 @@ extern HashTable * table;
 %type <tree_node> Program
 // BASIC DEFINITIONS
 %type <tree_node> ID
+%type <tree_node> FunID
 %type <tree_node> IDArray
 %type <tree_node> Lit
 %type <tree_node> Int
@@ -159,8 +162,8 @@ extern HashTable * table;
  *********/
 Init: %empty {push(&global_scope, hash_create());}
     ;
-
-Start: Init Program { arvore = $2; }
+End: %empty {hash_print(top(global_scope));}
+Start: Init Program End { arvore = $2; }
     ;
 Program: %empty                    { $$ = NULL;             }
        | GlobalVarDecl ';' Program { $$ = $3;               }
@@ -171,7 +174,7 @@ Program: %empty                    { $$ = NULL;             }
  * BASIC DEFINITIONS *
  *********************/
 
-ID: TK_IDENTIFICADOR { stored_element = store_identificador($1); 
+ID: TK_IDENTIFICADOR { store_identificador(&stored_element, $1); 
                         $$ = create_node($1, 0);
                     }
   ;
@@ -179,6 +182,10 @@ IDArray: ID              { $$ = $1;                             }
        | ID '[' Expr ']' { replace_name($2, "[]");
                            $$ = create_node($2, 2, $1, $3);}
        ;
+FunID: TK_IDENTIFICADOR { store_identificador(&stored_fun, $1); 
+                        $$ = create_node($1, 0);
+                    }
+
 Lit: TK_LIT_INT    { $$ = create_node($1, 0);}
    | TK_LIT_FLOAT  { $$ = create_node($1, 0);}
    | TK_LIT_TRUE   { $$ = create_node($1, 0);}
@@ -217,7 +224,12 @@ TypeStaticConst: TypeBase                          {}
  ***************************/
 
 /* Function declaration */
-FuncDecl: TypeStatic ID '(' ParamsDecl ')' CmdBlock { $$ = add_node($2, $6); }
+FuncDecl: TypeStatic FunID '(' ParamsDecl ')' CmdBlock { 
+                                                    $$ = add_node($2, $6); 
+                                                    store_function_elem(&stored_fun);
+                                                    HashTable *table = top(global_scope);
+                                                    hash_insert(&table, stored_fun, $1);
+                                                    }
         ;
 ParamsDecl: %empty        {}
           | ParamDeclList {}
@@ -248,9 +260,9 @@ GlobalVarDecl: TypeStatic GlobalVarList { HashTable *table = top(global_scope);
 GlobalVarList: GlobalVar                   {}
              | GlobalVar ',' GlobalVarList {}
              ;
-GlobalVar: ID      {store_nature(&stored_element, 0);
+GlobalVar: ID      {store_nature(&stored_element, NAT_VAR);
                     push_element(&var_list, stored_element);}
-         | ID '[' TK_LIT_INT ']' {store_nature(&stored_element, 1); 
+         | ID '[' TK_LIT_INT ']' {store_nature(&stored_element, NAT_VET); 
          push_element(&var_list, stored_element);}
          ;
 
@@ -268,14 +280,14 @@ LocalVarList: LocalVar                  { $$ = $1;                              
             | LocalVar ',' LocalVarList { $$ = ($1) == NULL ? ($3) : add_node($1, $3); }
             ;
 LocalVar: 
-        TK_IDENTIFICADOR                      { stored_element = store_identificador($1); $$ = NULL;
-                                                store_nature(&stored_element, 0);
+        TK_IDENTIFICADOR                      { store_identificador(&stored_element, $1); $$ = NULL;
+                                                store_nature(&stored_element, NAT_VAR);
                                                 push_element(&var_list, stored_element);}
         | ID TK_OC_LE IDArray { $$ = create_node($2, 2, $1, $3);
-                                store_nature(&stored_element, 0);
+                                store_nature(&stored_element, NAT_VAR);
                                 push_element(&var_list, stored_element);}
         | ID TK_OC_LE Lit     { $$ = create_node($2, 2, $1, $3); 
-                                store_nature(&stored_element, 0);
+                                store_nature(&stored_element, NAT_VAR);
                                 push_element(&var_list, stored_element);}
         ;
 
@@ -330,7 +342,7 @@ UnarySet: '+' UnaryExpr UnarySet { $$ = create_node($1, 1, $2, $3); }
  ************/
 CreateScope: '{' { push(&global_scope, hash_create());}
             ;
-DestroyScope: '}' { hash_print(top(global_scope)); pop(&global_scope); hash_print(top(global_scope));}
+DestroyScope: '}' { hash_print(top(global_scope)); pop(&global_scope);}
                 ;
 
 Cmd: LocalVarDecl            { $$ = $1;                         }
