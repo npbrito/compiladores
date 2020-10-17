@@ -1,14 +1,11 @@
-/* ------------------------------------------------
- * Author: Natália Paz Brito
- * Email: npbrito@inf.ufrgs.br
- * Date  : 2020-10-14
- * ------------------------------------------------ */
+/* Natália Brito | 00274727 */
+/* Yuri Jaschek  | 00231592 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "hash.h"
 #include "stack.h"
 #include "tree.h"
-#include "list.h"
 
 extern int yyparse(void);
 extern int yylex_destroy(void);

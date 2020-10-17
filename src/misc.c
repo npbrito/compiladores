@@ -48,19 +48,21 @@ void store_param(hash_element** stored_fun, ElementList* param_list){
     int args_cont = 0;
     // Salvando os parâmetros e contando
     while(!isEmpty_stack_list(param_list)){
-     push_element(&aux, pop_element(&param_list)); 
+    push_element(&aux, pop_element(&param_list)); 
     args_cont++;
-    }
+    }    
     fun->function_args = args_cont;
+    /*if(top_e->name == NULL){
+    fprintf(stderr, "param list = NULL \n");}*/
+    if (args_cont > 0){
     // Adcionando os parametros na lista da função
     fun->function_param = (parameter*)calloc(args_cont, sizeof(parameter));
-   int i = 0;
+    int i = 0;
     while(!isEmpty_stack_list(aux) && i < args_cont){
     param = pop_element(&aux);
     fun->function_param[i].name = param->name;
     fun->function_param[i].type= param->type;
-    
     i++;
-    }
+    }}
     *stored_fun = fun;
 }

@@ -48,7 +48,6 @@ void hash_insert(HashTable** root, hash_element* newElement, int type){
     table[index].value->type = type;
     if(newElement->nature == NAT_VET){
     table[index].value->type_size = newElement->vet_size*calc_type_size(type);
-    fprintf(stderr, "size: %d\n", newElement->vet_size);
     }
     else
     {
@@ -67,7 +66,7 @@ int hash_search(HashTable* table, char* name){
    int elements_searched = 0;
    while(table[index].value != NULL && elements_searched < HASH_SIZE){
         if(strcmp(name, table[index].value->name) == 0)
-            return 1 ;
+            return table[index].value->line ;
         if(index < HASH_SIZE){
             index++;
         }

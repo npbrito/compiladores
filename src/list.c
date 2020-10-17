@@ -38,6 +38,9 @@ hash_element * pop_element(ElementList** root){
     free(temp); 
     return popped; 
 }
+hash_element* top_element(ElementList* root){
+    return root->element; 
+}
 
 void push_param(ElementList** root, hash_element* data, int type){
     ElementList* topNode = create_stack_list(&data);

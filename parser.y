@@ -10,6 +10,7 @@
 #include "stack.h"
 #include "list.h"
 #include "misc.h"
+#include "semantic.h"
 
 void yyerror(char const *s);
 void replace_name(lexeme_t *lex, const char *str);
@@ -227,12 +228,20 @@ TypeStaticConst: TypeBase                          {}
 
 /* Function declaration */
 FuncDecl: TypeStatic FunID '(' ParamsDecl ')' CmdBlock { 
-                                                    $$ = add_node($2, $6); 
+    $$ = add_node($2, $6);   
                                                     store_function_elem(&stored_fun);
                                                     store_param(&stored_fun,param_list);
-                                                    HashTable *table = top(global_scope);
+                                                    param_list = NULL;
+                                                    HashTable *table = top(global_scope);   
+                                                    int already_on_table = hash_search(table, stored_fun->name);
+                                                    if (already_on_table == 0){
                                                     hash_insert(&table, stored_fun, $1);
-                                                    }
+                                                    }                                            
+                                                    else{
+                                                    // NÃO COLOCAR NA ÁRVORE CASO TIVER ERRO
+                                                    print_ERR_DECLARED(stored_fun ,already_on_table);
+                                            }
+}
         ;
 ParamsDecl: %empty        {}
           | ParamDeclList {}
@@ -240,7 +249,7 @@ ParamsDecl: %empty        {}
 ParamDeclList: ParamDecl                   {}
              | ParamDecl ',' ParamDeclList {}
              ;
-ParamDecl: TypeConst ID { destroy_node($2); 
+ParamDecl: TypeConst TK_IDENTIFICADOR { store_identificador(&stored_element,$2);
                     store_nature(&stored_element, NAT_VAR);
                     push_param(&param_list, stored_element, $1);}
          ;
@@ -259,7 +268,14 @@ ParamCallList: Expr                   { $$ = $1;               }
 GlobalVarDecl: TypeStatic GlobalVarList { HashTable *table = top(global_scope);
                                             while(!isEmpty_stack_list(var_list)){
                                             hash_element* element = pop_element(&var_list);
+                                            int already_on_table = hash_search(table, element->name);
+                                            if(already_on_table == 0){
                                             hash_insert(&table, element, $1);}
+                                            else{
+                                                print_ERR_DECLARED(element ,already_on_table);
+                                                }
+                                            }
+                                            var_list = NULL;
                                         }
              ;
 GlobalVarList: GlobalVar                   {}
@@ -278,8 +294,14 @@ LocalVarDecl:
                                         HashTable *table = top(global_scope);
                                         while(!isEmpty_stack_list(var_list)){
                                             hash_element* element = pop_element(&var_list);
-                                            hash_insert(&table, element, $1);
+                                            int already_on_table = hash_search(table, element->name);
+                                            if(already_on_table == 0){
+                                            hash_insert(&table, element, $1);}
+                                            else{
+                                                print_ERR_DECLARED(element ,already_on_table);
+                                            }
                                         }
+                                        var_list = NULL;
              }
             ;
 LocalVarList: LocalVar                  { $$ = $1;                                     }
@@ -372,7 +394,13 @@ CmdSeq: %empty          { $$ = NULL;                                   }
       ;
 
  /*Assignment */
-Assignment: IDArray '=' Expr { $$ = create_node($2, 2, $1, $3); }
+Assignment: IDArray '=' Expr { $$ = create_node($2, 2, $1, $3); 
+                            HashTable *table = top(global_scope);
+                            int already_on_table = hash_search(table, stored_element->name);
+                            if(already_on_table == 0){
+                                print_ERR_UNDECLARED(stored_element, already_on_table);
+                            }
+                            }
           ;
 
 /* Control flow */

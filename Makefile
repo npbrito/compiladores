@@ -15,6 +15,7 @@ FILES=\
 		src/stack.c \
 		src/list.c \
 		src/misc.c \
+		src/semantic.c \
 		src/tree.c 
 
 .PHONY: all
