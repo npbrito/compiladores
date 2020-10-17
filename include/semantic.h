@@ -29,6 +29,6 @@
 #define ERR_WRONG_PAR_SHIFT  53
 
 void print_ERR_DECLARED(hash_element* ,int);
-void print_ERR_UNDECLARED(hash_element* id, int line);
+void print_ERR_UNDECLARED(hash_element* );
 
 #endif // SEMANTIC_H_

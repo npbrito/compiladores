@@ -29,4 +29,7 @@ HashTable* pop(StackNode**);
 /* Returns the element at the top of the stack */
 HashTable* top(StackNode*);
 
+/* Returns the element at the bottom of the stack */
+HashTable* bottom(StackNode*);
+
 #endif //STACK_H_

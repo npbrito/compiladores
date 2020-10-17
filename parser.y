@@ -181,9 +181,21 @@ ID: TK_IDENTIFICADOR { store_identificador(&stored_element, $1);
                         $$ = create_node($1, 0);
                     }
   ;
-IDArray: ID              { $$ = $1;                             }
+IDArray: ID              { $$ = $1;                             
+                         HashTable *table = top(global_scope);
+                         store_nature(&stored_element, NAT_VAR);
+                            int already_on_table = hash_search(table, stored_element->name);
+                            if(already_on_table == 0){
+                                print_ERR_UNDECLARED(stored_element);
+                            }}
        | ID '[' Expr ']' { replace_name($2, "[]");
-                           $$ = create_node($2, 2, $1, $3);}
+                           $$ = create_node($2, 2, $1, $3);
+                            HashTable *table = top(global_scope);
+                            store_nature(&stored_element, NAT_VET);
+                            int already_on_table = hash_search(table, stored_element->name);
+                            if(already_on_table == 0){
+                                print_ERR_UNDECLARED(stored_element);
+                            }}
        ;
 FunID: TK_IDENTIFICADOR { store_identificador(&stored_fun, $1); 
                         $$ = create_node($1, 0);
@@ -255,7 +267,13 @@ ParamDecl: TypeConst TK_IDENTIFICADOR { store_identificador(&stored_element,$2);
          ;
 
 /* Function call */
-FuncCall: ID '(' ParamsCall ')' { ($1)->lex_value->type = TYPE_FUNC_CALL; $$ = add_node($1, $3); }
+FuncCall: ID '(' ParamsCall ')' { ($1)->lex_value->type = TYPE_FUNC_CALL; $$ = add_node($1, $3); 
+                                HashTable *table_global = bottom(global_scope);
+                                store_nature(&stored_element, NAT_FUN);
+                                int already_on_table = hash_search(table_global, stored_element->name);                                if (already_on_table == 0){
+                                    print_ERR_UNDECLARED(stored_element);
+                                }
+                                }
         ;
 ParamsCall: %empty        { $$ = NULL; }
           | ParamCallList { $$ = $1;   }
@@ -394,13 +412,7 @@ CmdSeq: %empty          { $$ = NULL;                                   }
       ;
 
  /*Assignment */
-Assignment: IDArray '=' Expr { $$ = create_node($2, 2, $1, $3); 
-                            HashTable *table = top(global_scope);
-                            int already_on_table = hash_search(table, stored_element->name);
-                            if(already_on_table == 0){
-                                print_ERR_UNDECLARED(stored_element, already_on_table);
-                            }
-                            }
+Assignment: IDArray '=' Expr { $$ = create_node($2, 2, $1, $3); }
           ;
 
 /* Control flow */

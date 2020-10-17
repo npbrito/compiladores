@@ -48,3 +48,18 @@ HashTable* top(StackNode* root){
     return root->symbol_table; 
 }
 
+HashTable* bottom(StackNode* root){
+    StackNode* last_stack = NULL;
+    HashTable* last_table = NULL;
+    // desempilahndo até o ultimo elemento
+    int i = 0;
+    while(!isEmpty(root)){
+        push(&last_stack, pop(&root));
+    }
+    last_table = top(last_stack);
+    // empilhando
+    while(!isEmpty(last_stack)){
+        push(&root, pop(&last_stack));
+    }
+    return last_table;
+}
