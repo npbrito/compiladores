@@ -13,6 +13,8 @@ void store_identificador(hash_element**, lexeme_t*);
 
 void store_nature(hash_element**, int nature);
 
+void store_vet_size(hash_element** id_stored, int size);
+
 void store_function_elem(hash_element**);
 
 

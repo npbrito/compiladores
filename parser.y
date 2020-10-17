@@ -237,7 +237,9 @@ ParamsDecl: %empty        {}
 ParamDeclList: ParamDecl                   {}
              | ParamDecl ',' ParamDeclList {}
              ;
-ParamDecl: TypeConst ID { destroy_node($2); }
+ParamDecl: TypeConst ID { destroy_node($2); 
+                    store_nature(&stored_element, NAT_VAR);
+                    push_element(&var_list, stored_element);}
          ;
 
 /* Function call */
@@ -262,7 +264,8 @@ GlobalVarList: GlobalVar                   {}
              ;
 GlobalVar: ID      {store_nature(&stored_element, NAT_VAR);
                     push_element(&var_list, stored_element);}
-         | ID '[' TK_LIT_INT ']' {store_nature(&stored_element, NAT_VET); 
+         | ID '[' TK_LIT_INT ']' {store_nature(&stored_element, NAT_VET);
+         store_vet_size(&stored_element, $3->val.d); 
          push_element(&var_list, stored_element);}
          ;
 

@@ -1,3 +1,5 @@
+/* Natália Brito | 00274727 */
+/* Yuri Jaschek  | 00231592 */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,6 +21,12 @@ void store_identificador(hash_element** id_stored, lexeme_t* id){
 void store_nature(hash_element** id_stored, int nature){
         hash_element* aux = *id_stored;
         aux->nature = nature;
+        *id_stored = aux;
+}
+
+void store_vet_size(hash_element** id_stored, int size){
+        hash_element* aux = *id_stored;
+        aux->vet_size = size;
         *id_stored = aux;
 }
 

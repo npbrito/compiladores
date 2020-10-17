@@ -1,8 +1,5 @@
-/* ------------------------------------------------
- * Author: Natália Paz Brito
- * Email: npbrito@inf.ufrgs.br
- * Date  : 2020-10-14
- * ------------------------------------------------ */
+/* Natália Brito | 00274727 */
+/* Yuri Jaschek  | 00231592 */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +7,7 @@
 #include <stdbool.h>
 
 #include "hash.h"
+#include "misc.h"
 #include "parser.tab.h"
 
 int stored_nature = 0;
@@ -48,8 +46,15 @@ void hash_insert(HashTable** root, hash_element* newElement, int type){
     
     table[index].value = newElement;
     table[index].value->type = type;
+    if(newElement->nature == NAT_VET){
+    table[index].value->type_size = newElement->vet_size*calc_type_size(type);
+    fprintf(stderr, "size: %d\n", newElement->vet_size);
+    }
+    else
+    {
     table[index].value->type_size = calc_type_size(type);
-
+    }
+    
     *root = table;
     }
     else{

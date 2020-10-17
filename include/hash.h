@@ -1,8 +1,5 @@
-/* ------------------------------------------------
- * Author: Natália Paz Brito
- * Email: npbrito@inf.ufrgs.br
- * Date  : 2020-10-14
- * ------------------------------------------------ */
+/* Natália Brito | 00274727 */
+/* Yuri Jaschek  | 00231592 */
 
 #ifndef HASH_H_
 #define HASH_H_
@@ -20,6 +17,7 @@ typedef struct hash_element{
     int nature;
     int type;
     int type_size;
+    int vet_size;
     union Literal val;
     // For functions
     int args;
