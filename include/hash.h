@@ -9,6 +9,12 @@
 // Hash table size 
 #define HASH_SIZE 10
 
+typedef struct parameter
+{
+    char* name;
+    int type;
+} parameter;
+
 // Store the values of the hash table elements
 typedef struct hash_element{
     // Non-function
@@ -20,9 +26,8 @@ typedef struct hash_element{
     int vet_size;
     union Literal val;
     // For functions
-    int args;
-    char* arg_name;
-    int arg_type;
+    int function_args;
+    parameter* function_param;
 
 } hash_element;
 

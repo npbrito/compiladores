@@ -1,8 +1,5 @@
-/* ------------------------------------------------
- * Author: Natália Paz Brito
- * Email: npbrito@inf.ufrgs.br
- * Date  : 2020-10-14
- * ------------------------------------------------ */
+/* Natália Brito | 00274727 */
+/* Yuri Jaschek  | 00231592 */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,8 +7,7 @@
 #include <stdbool.h>
 
 #include "list.h"
-
-
+#include "hash.h"
 
 // Stack to create lists of variables
 ElementList *create_stack_list(hash_element** new_element){
@@ -41,4 +37,14 @@ hash_element * pop_element(ElementList** root){
     hash_element* popped = temp->element; 
     free(temp); 
     return popped; 
+}
+
+void push_param(ElementList** root, hash_element* data, int type){
+    ElementList* topNode = create_stack_list(&data);
+    // Empurra a raiz pra baixo do novo elemento da pilha
+    topNode->element->type = type;
+    topNode->element->type_size = calc_type_size(type);
+
+    topNode->next = *root;
+    *root = topNode;
 }

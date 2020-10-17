@@ -1,11 +1,5 @@
-int ggg[1];
-int f[10];
-int jkkl[5];
-
-int main(){
+int main(int g, int f, int h){
     int j <= 5;
     int k <= 3;
     int l <= 2;
 }
-
-int kkkk;

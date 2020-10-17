@@ -1,11 +1,8 @@
-/* ------------------------------------------------
- * Author: Natália Paz Brito
- * Email: npbrito@inf.ufrgs.br
- * Date  : 2020-10-14
- * ------------------------------------------------ */
+/* Natália Brito | 00274727 */
+/* Yuri Jaschek  | 00231592 */
 
 #ifndef LIST_H_
-#define LSIT_H_
+#define LIST_H_
 
 #include "hash.h"
 
@@ -31,5 +28,8 @@ hash_element* pop_element(ElementList**);
 
 /* Returns the element at the top of the stack */
 hash_element* top_element(ElementList*);
+
+/* Add a parameter to the stack */
+void push_param(ElementList**, hash_element*, int type);
 
 #endif //LIST_H_

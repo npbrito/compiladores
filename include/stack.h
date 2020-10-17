@@ -1,8 +1,5 @@
-/* ------------------------------------------------
- * Author: Natália Paz Brito
- * Email: npbrito@inf.ufrgs.br
- * Date  : 2020-10-14
- * ------------------------------------------------ */
+/* Natália Brito | 00274727 */
+/* Yuri Jaschek  | 00231592 */
 
 #ifndef STACK_H_
 #define STACK_H_

@@ -18,6 +18,7 @@ extern int yylineno;
 extern void *arvore;
 StackNode* global_scope = NULL;
 ElementList* var_list = NULL;
+ElementList* param_list = NULL;
 hash_element* stored_element = NULL;
 hash_element* stored_fun = NULL;
 extern HashTable * table;
@@ -121,6 +122,7 @@ extern HashTable * table;
 %type <type> TypeBase
 %type <type> TypeStaticConst
 %type <type> TypeStatic
+%type <type> TypeConst
 // FUNCTIONS AND VARIABLES
 %type <tree_node> FuncDecl
 %type <tree_node> ParamsDecl
@@ -227,6 +229,7 @@ TypeStaticConst: TypeBase                          {}
 FuncDecl: TypeStatic FunID '(' ParamsDecl ')' CmdBlock { 
                                                     $$ = add_node($2, $6); 
                                                     store_function_elem(&stored_fun);
+                                                    store_param(&stored_fun,param_list);
                                                     HashTable *table = top(global_scope);
                                                     hash_insert(&table, stored_fun, $1);
                                                     }
@@ -239,7 +242,7 @@ ParamDeclList: ParamDecl                   {}
              ;
 ParamDecl: TypeConst ID { destroy_node($2); 
                     store_nature(&stored_element, NAT_VAR);
-                    push_element(&var_list, stored_element);}
+                    push_param(&param_list, stored_element, $1);}
          ;
 
 /* Function call */
