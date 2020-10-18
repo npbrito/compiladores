@@ -10,7 +10,7 @@
 #include "tree.h"
 #include "parser.tab.h"
 
-node_t *create_node(lexeme_t *lex_value, int N, ...)
+node_t *create_node(int type,lexeme_t *lex_value, int N, ...)
 {
     node_t *ans = (node_t*)malloc(sizeof(node_t));
     if (!ans) {
@@ -18,6 +18,7 @@ node_t *create_node(lexeme_t *lex_value, int N, ...)
     }
     memset(ans, 0, sizeof(node_t));
     ans->lex_value = lex_value;
+    ans->node_type = type;
     if (N > 0) {
         va_list args;
         va_start(args, N);

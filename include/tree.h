@@ -27,7 +27,7 @@ typedef struct node_t {
     struct node_t *children[MAX_CHILDREN];
 } node_t;
 
-node_t *create_node(lexeme_t *lex_value, int N, ...);
+node_t *create_node(int type,lexeme_t *lex_value, int N, ...);
 node_t *add_node(node_t *parent, node_t *child);
 void destroy_node(node_t *tree);
 void destroy_lexeme(lexeme_t *lex_value);

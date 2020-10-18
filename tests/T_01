@@ -1,8 +1,8 @@
 int glv[5];
 int main(int y, char j){
     int j <= 'a';
-    int j <= false;
-    int j <= "MYSTRING";
+    int k <= 5;
+    main(k, "asdad");
     int j <= 2;
 }
 

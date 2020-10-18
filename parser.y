@@ -179,7 +179,7 @@ Program: %empty                    { $$ = NULL;             }
  *********************/
 
 ID: TK_IDENTIFICADOR { store_identificador(&stored_element, $1); 
-                        $$ = create_node($1, 0);
+                        $$ = create_node(NAT_VAR,$1, 0);
                     }
   ;
 IDArray: ID              { $$ = $1;  
@@ -198,7 +198,7 @@ IDArray: ID              { $$ = $1;
                         }
        | ID '[' Expr ']' { 
                             replace_name($2, "[]");
-                            $$ = create_node($2, 2, $1, $3);
+                            $$ = create_node(NAT_VET,$2, 2, $1, $3);
                             store_nature(&stored_element, NAT_VET);
                             int already_on_table = hash_search(global_scope, stored_element->name);
                             if(already_on_table == 0){
@@ -214,39 +214,39 @@ IDArray: ID              { $$ = $1;
                             }
        ;
 FunID: TK_IDENTIFICADOR { store_identificador(&stored_fun, $1); 
-                        $$ = create_node($1, 0);
+                        $$ = create_node(NAT_VET,$1, 0);
                     }
 
-Lit: TK_LIT_INT    { $$ = create_node($1, 0);
+Lit: TK_LIT_INT    { $$ = create_node(NAT_INT,$1, 0);
                     store_literal(&stored_literal, $1, NAT_INT);
                     HashTable * table = top(global_scope);
                     hash_insert(&table, stored_literal,TK_PR_INT);
 
                     }
-   | TK_LIT_FLOAT  { $$ = create_node($1, 0);
+   | TK_LIT_FLOAT  { $$ = create_node(NAT_FLOAT,$1, 0);
                     store_literal(&stored_literal, $1, NAT_FLOAT);
                     HashTable * table = top(global_scope);
                     hash_insert(&table, stored_literal,TK_PR_FLOAT);
 }
-   | TK_LIT_TRUE   { $$ = create_node($1, 0);
+   | TK_LIT_TRUE   { $$ = create_node(NAT_TRUE,$1, 0);
                     store_literal(&stored_literal, $1, NAT_TRUE);
                     HashTable * table = top(global_scope);
                     hash_insert(&table, stored_literal,TK_PR_BOOL);}
-   | TK_LIT_FALSE  { $$ = create_node($1, 0);
+   | TK_LIT_FALSE  { $$ = create_node(NAT_FALSE,$1, 0);
                      store_literal(&stored_literal, $1, NAT_FALSE);
                     HashTable * table = top(global_scope);
                     hash_insert(&table, stored_literal,TK_PR_BOOL);}
-   | TK_LIT_CHAR   { $$ = create_node($1, 0);
+   | TK_LIT_CHAR   { $$ = create_node(NAT_CHAR,$1, 0);
                     store_literal(&stored_literal, $1, NAT_CHAR);
                     HashTable * table = top(global_scope);
                     hash_insert(&table, stored_literal,TK_PR_CHAR);}
-   | TK_LIT_STRING { $$ = create_node($1, 0);
+   | TK_LIT_STRING { $$ = create_node(NAT_STR,$1, 0);
                     store_literal(&stored_literal, $1, NAT_STR);
                     HashTable * table = top(global_scope);
                     hash_insert(&table, stored_literal,TK_PR_CHAR);
                     }
    ;
-Int: TK_LIT_INT { $$ = create_node($1, 0); }
+Int: TK_LIT_INT { $$ = create_node(NAT_INT,$1, 0); }
    ;
 
 /*********
@@ -308,27 +308,22 @@ ParamDecl: TypeConst TK_IDENTIFICADOR { store_identificador(&stored_element,$2);
          ;
 
 /* Function call */
-FuncCall: ID '(' ParamsCall ')' { 
-                                ($1)->lex_value->type = TYPE_FUNC_CALL; $$ = add_node($1, $3); 
-                                store_nature(&stored_element, NAT_FUN);
-                                int already_on_table = hash_search(global_scope, stored_element->name);                               
+FuncCall: FunID '(' ParamsCall ')' { 
+                                store_nature(&stored_fun, NAT_FUN);
+                                int already_on_table = hash_search(global_scope, stored_fun->name);                               
                                 if(already_on_table == 0){
-                                print_ERR_UNDECLARED(stored_element);
+                                print_ERR_UNDECLARED(stored_fun);
                                 }
                                 else{
-                                int previous_nature = id_nature(global_scope, stored_element->name);
+                                int previous_nature = id_nature(global_scope, stored_fun->name);
                                 if(previous_nature != 2)
                                 {
-                                    print_ERR_FUNCTION(stored_element, previous_nature);
+                                    print_ERR_FUNCTION(stored_fun, previous_nature);
                                 }
-                                stored_fun = stored_element;
                                 }
-                               int call_args = 0;
-                               cont_call_args($3, &call_args);
-                               int decl_args =  get_decl_args(global_scope, stored_fun->name);
-                                if(decl_args != call_args){
-                                print_ERR_NUM_ARGS(stored_fun, decl_args, call_args);
-                                }
+                                check_parameters(global_scope,stored_fun ,$3);
+                               
+                                ($1)->lex_value->type = TYPE_FUNC_CALL; $$ = add_node($1, $3); 
                                 }
         ;
 ParamsCall: %empty        { $$ = NULL; }
@@ -386,10 +381,10 @@ LocalVar:
         TK_IDENTIFICADOR                      { store_identificador(&stored_element, $1); $$ = NULL;
                                                 store_nature(&stored_element, NAT_VAR);
                                                 push_element(&var_list, stored_element);}
-        | ID TK_OC_LE IDArray { $$ = create_node($2, 2, $1, $3);
+        | ID TK_OC_LE IDArray { $$ = create_node(NAT_VAR,$2, 2, $1, $3);
                                 store_nature(&stored_element, NAT_VAR);
                                 push_element(&var_list, stored_element);}
-        | ID TK_OC_LE Lit     { $$ = create_node($2, 2, $1, $3); 
+        | ID TK_OC_LE Lit     { $$ = create_node(NAT_VAR,$2, 2, $1, $3); 
                                 store_nature(&stored_element, NAT_VAR);
                                 push_element(&var_list, stored_element);}
         ;
@@ -400,44 +395,44 @@ LocalVar:
 
 Expr: UnaryExpr              { $$ = $1;                             }
     | UnarySet               { $$ = $1;                             }
-    | Expr '+' Expr          { $$ = create_node($2, 2, $1, $3);     }
-    | Expr '-' Expr          { $$ = create_node($2, 2, $1, $3);     }
-    | Expr '*' Expr          { $$ = create_node($2, 2, $1, $3);     }
-    | Expr '/' Expr          { $$ = create_node($2, 2, $1, $3);     }
-    | Expr '%' Expr          { $$ = create_node($2, 2, $1, $3);     }
-    | Expr '|' Expr          { $$ = create_node($2, 2, $1, $3);     }
-    | Expr '&' Expr          { $$ = create_node($2, 2, $1, $3);     }
-    | Expr '^' Expr          { $$ = create_node($2, 2, $1, $3);     }
-    | Expr '<' Expr          { $$ = create_node($2, 2, $1, $3);     }
-    | Expr '>' Expr          { $$ = create_node($2, 2, $1, $3);     }
-    | Expr TK_OC_EQ Expr     { $$ = create_node($2, 2, $1, $3);     }
-    | Expr TK_OC_NE Expr     { $$ = create_node($2, 2, $1, $3);     }
-    | Expr TK_OC_LE Expr     { $$ = create_node($2, 2, $1, $3);     }
-    | Expr TK_OC_GE Expr     { $$ = create_node($2, 2, $1, $3);     }
-    | Expr TK_OC_AND Expr    { $$ = create_node($2, 2, $1, $3);     }
-    | Expr TK_OC_OR Expr     { $$ = create_node($2, 2, $1, $3);     }
+    | Expr '+' Expr          { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr '-' Expr          { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr '*' Expr          { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr '/' Expr          { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr '%' Expr          { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr '|' Expr          { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr '&' Expr          { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr '^' Expr          { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr '<' Expr          { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr '>' Expr          { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr TK_OC_EQ Expr     { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr TK_OC_NE Expr     { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr TK_OC_LE Expr     { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr TK_OC_GE Expr     { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr TK_OC_AND Expr    { $$ = create_node(EXP,$2, 2, $1, $3);     }
+    | Expr TK_OC_OR Expr     { $$ = create_node(EXP,$2, 2, $1, $3);     }
     | Expr '?' Expr ':' Expr { replace_name($2, "?:");
-                               $$ = create_node($2, 3, $1, $3, $5); }
+                               $$ = create_node(EXP,$2, 3, $1, $3, $5); }
     | '(' Expr ')'           { $$ = $2;                             }
     ;
 UnaryExpr: IDArray  { $$ = $1; }
          | Lit      { $$ = $1; }
          | FuncCall { $$ = $1; }
          ;
-UnarySet: '+' UnaryExpr UnarySet { $$ = create_node($1, 1, $2, $3); }
-        | '-' UnaryExpr UnarySet { $$ = create_node($1, 1, $2, $3); }
-        | '!' UnaryExpr UnarySet { $$ = create_node($1, 1, $2, $3); }
-        | '&' UnaryExpr UnarySet { $$ = create_node($1, 1, $2, $3); }
-        | '*' UnaryExpr UnarySet { $$ = create_node($1, 1, $2, $3); }
-        | '?' UnaryExpr UnarySet { $$ = create_node($1, 1, $2, $3); }
-        | '#' UnaryExpr UnarySet { $$ = create_node($1, 1, $2, $3); }
-        | '+' UnaryExpr          { $$ = create_node($1, 1, $2);     }
-        | '-' UnaryExpr          { $$ = create_node($1, 1, $2);     }
-        | '!' UnaryExpr          { $$ = create_node($1, 1, $2);     }
-        | '&' UnaryExpr          { $$ = create_node($1, 1, $2);     }
-        | '*' UnaryExpr          { $$ = create_node($1, 1, $2);     }
-        | '?' UnaryExpr          { $$ = create_node($1, 1, $2);     }
-        | '#' UnaryExpr          { $$ = create_node($1, 1, $2);     }
+UnarySet: '+' UnaryExpr UnarySet { $$ = create_node(EXP,$1, 1, $2, $3); }
+        | '-' UnaryExpr UnarySet { $$ = create_node(EXP,$1, 1, $2, $3); }
+        | '!' UnaryExpr UnarySet { $$ = create_node(EXP,$1, 1, $2, $3); }
+        | '&' UnaryExpr UnarySet { $$ = create_node(EXP,$1, 1, $2, $3); }
+        | '*' UnaryExpr UnarySet { $$ = create_node(EXP,$1, 1, $2, $3); }
+        | '?' UnaryExpr UnarySet { $$ = create_node(EXP,$1, 1, $2, $3); }
+        | '#' UnaryExpr UnarySet { $$ = create_node(EXP,$1, 1, $2, $3); }
+        | '+' UnaryExpr          { $$ = create_node(EXP,$1, 1, $2);     }
+        | '-' UnaryExpr          { $$ = create_node(EXP,$1, 1, $2);     }
+        | '!' UnaryExpr          { $$ = create_node(EXP,$1, 1, $2);     }
+        | '&' UnaryExpr          { $$ = create_node(EXP,$1, 1, $2);     }
+        | '*' UnaryExpr          { $$ = create_node(EXP,$1, 1, $2);     }
+        | '?' UnaryExpr          { $$ = create_node(EXP,$1, 1, $2);     }
+        | '#' UnaryExpr          { $$ = create_node(EXP,$1, 1, $2);     }
         ;
 
 /************
@@ -450,16 +445,16 @@ DestroyScope: '}' { hash_print(top(global_scope)); pop(&global_scope);}
 
 Cmd: LocalVarDecl            { $$ = $1;                         }
    | Assignment              { $$ = $1;                         }
-   | TK_PR_INPUT IDArray     { $$ = create_node($1, 1, $2);     }
-   | TK_PR_OUTPUT IDArray    { $$ = create_node($1, 1, $2);     }
-   | TK_PR_OUTPUT Lit        { $$ = create_node($1, 1, $2);     }
+   | TK_PR_INPUT IDArray     { $$ = create_node(INP,$1, 1, $2);     }
+   | TK_PR_OUTPUT IDArray    { $$ = create_node(OUT,$1, 1, $2);     }
+   | TK_PR_OUTPUT Lit        { $$ = create_node(OUT,$1, 1, $2);     }
    | CmdBlock                { $$ = $1;                         }
    | FuncCall                { $$ = $1;                         }
-   | IDArray TK_OC_SL Int    { $$ = create_node($2, 2, $1, $3); }
-   | IDArray TK_OC_SR Int    { $$ = create_node($2, 2, $1, $3); }
-   | TK_PR_RETURN Expr       { $$ = create_node($1, 1, $2);     }
-   | TK_PR_BREAK             { $$ = create_node($1, 0);         }
-   | TK_PR_CONTINUE          { $$ = create_node($1, 0);         }
+   | IDArray TK_OC_SL Int    { $$ = create_node(SL,$2, 2, $1, $3); }
+   | IDArray TK_OC_SR Int    { $$ = create_node(SR,$2, 2, $1, $3); }
+   | TK_PR_RETURN Expr       { $$ = create_node(RET,$1, 1, $2);     }
+   | TK_PR_BREAK             { $$ = create_node(BREAK,$1, 0);         }
+   | TK_PR_CONTINUE          { $$ = create_node(CONT,$1, 0);         }
    | ControlFlow             { $$ = $1;                         }
    ;
 CmdBlock: CreateScope CmdSeq DestroyScope { $$ = $2;}
@@ -469,7 +464,7 @@ CmdSeq: %empty          { $$ = NULL;                                   }
       ;
 
  /*Assignment */
-Assignment: IDArray '=' Expr { $$ = create_node($2, 2, $1, $3); }
+Assignment: IDArray '=' Expr { $$ = create_node(ASS,$2, 2, $1, $3); }
           ;
 
 /* Control flow */
@@ -477,14 +472,14 @@ ControlFlow: If      { $$ = $1; }
            | For     { $$ = $1; }
            | While   { $$ = $1; }
            ;
-If: TK_PR_IF '(' Expr ')' CmdBlock Else { $$ = create_node($1, 3, $3, $5, $6); }
+If: TK_PR_IF '(' Expr ')' CmdBlock Else { $$ = create_node(FLOW,$1, 3, $3, $5, $6); }
   ;
 Else: %empty              { $$ = NULL; }
     | TK_PR_ELSE CmdBlock { $$ = $2;   }
     ;
-For: TK_PR_FOR '(' Assignment ':' Expr ':' Assignment ')' CmdBlock { $$ = create_node($1, 4, $3, $5, $7, $9); }
+For: TK_PR_FOR '(' Assignment ':' Expr ':' Assignment ')' CmdBlock { $$ = create_node(FLOW,$1, 4, $3, $5, $7, $9); }
    ;
-While: TK_PR_WHILE '(' Expr ')' TK_PR_DO CmdBlock { $$ = create_node($1, 2, $3, $6); }
+While: TK_PR_WHILE '(' Expr ')' TK_PR_DO CmdBlock { $$ = create_node(FLOW,$1, 2, $3, $6); }
      ;
 
 

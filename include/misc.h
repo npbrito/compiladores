@@ -18,6 +18,18 @@
 #define NAT_FALSE 6
 #define NAT_CHAR 7
 #define NAT_STR 8
+#define CMD 9
+#define EXP 10
+#define INP 11
+#define OUT 12
+#define SL 13
+#define SR 14
+#define RET 15
+#define BREAK 16
+#define CONT 17
+#define ASS 18
+#define FLOW 19
+#define PARAM 20
 
 void store_identificador(hash_element**, lexeme_t*);
 
@@ -31,12 +43,20 @@ void store_param(hash_element**, ElementList*);
 
 int id_nature(StackNode*, char* );
 
+int search_type(StackNode *, char *);
+
+void check_parameters(StackNode* ,hash_element* ,node_t * );
+
 int get_decl_args(StackNode * stack, char * name);
+
+parameter* fun_table_type_decl(StackNode *, char *);
 
 int check_fun_args(ElementList*);
 
 int cont_call_args(node_t*, int*);
 
 void store_literal(hash_element** id_stored, lexeme_t* id, int nature);
+
+int get_param_type_list(node_t* node, ElementList** root);
 
 #endif // MISC_H_

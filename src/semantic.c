@@ -68,9 +68,35 @@ void print_ERR_FUNCTION(hash_element* id, int previous_nature){
 
 void print_ERR_NUM_ARGS(hash_element* id, int args_decl, int args_call){
         if (args_call > args_decl)
-        fprintf(stderr, "Line %d \033[1;31m ERR_EXCESS_ARGS:\033[0m to much arguments on call of \033[1m'%s'\033[0m. \033[1;31m %d\033[0m excess arguments.\n", id->line, id->name, args_call-args_decl);
+        fprintf(stderr, "Line %d \033[1;31m ERR_EXCESS_ARGS:\033[0m to much arguments on call of \033[1m'%s'\033[0m \033[1;31m %d\033[0m excess arguments.\n", id->line, id->name, args_call-args_decl);
         if (args_call < args_decl)
-        fprintf(stderr, "Line %d \033[1;31m ERR_MISSING_ARGS:\033[0m to few arguments on call of \033[1m'%s'\033[0m. \033[1;31m %d\033[0m missing arguments.\n", id->line, id->name, args_decl-args_call);
+        fprintf(stderr, "Line %d \033[1;31m ERR_MISSING_ARGS:\033[0m to few arguments on call of \033[1m'%s'\033[0m \033[1;31m %d\033[0m missing arguments.\n", id->line, id->name, args_decl-args_call);
 
     
+}
+
+void print_ERR_WRONG_TYPE_ARGS(hash_element* id, int dectype, char* paramname, int paramtype){
+   fprintf(stderr, "Line %d \033[1;31m ERR_WRONG_TYPE_ARGS:\033[0m ", id->line);
+   fprintf(stderr, "on call of \033[1m'%s'\033[0m ",  id->name);
+   fprintf(stderr, "%s is ",  paramname);
+   fprintf(stderr, "\033[1;31m %s\033[0m, ",  args_type(paramtype));
+   fprintf(stderr, "but expected \033[1;32m%s.\033[0m\n", args_type(dectype));
+
+}
+
+char* args_type(int type){
+
+    switch (type)
+    {
+    case 258:
+        return "int";
+    case 259:
+        return "float";
+    case 260:
+        return "bool";
+    case 261:
+        return "char";
+    case 262:
+        return "string";
+    }
 }
