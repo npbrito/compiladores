@@ -1,9 +1,10 @@
 int glv[5];
 int main(int y, char j){
-    int j <= 'a';
+    char j <= 'a';
     int k <= 5;
     main(k, "asdad");
-    int j <= 2;
+    input j;
+    output j;
 }
 
 

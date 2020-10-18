@@ -35,5 +35,9 @@ void print_ERR_VECTOR(hash_element* , int previous_nature);
 void print_ERR_FUNCTION(hash_element* , int previous_nature);
 void print_ERR_NUM_ARGS(hash_element* , int args_decl, int args_call);
 void print_ERR_WRONG_TYPE_ARGS(hash_element* , int,char*, int);
+void print_ERR_WRONG_PAR_INPUT(hash_element* id, int);
+void print_ERR_WRONG_PAR_OUTPUT(hash_element* id, int);
 char* args_type(int type);
+
+
 #endif // SEMANTIC_H_

@@ -47,6 +47,8 @@ int search_type(StackNode *, char *);
 
 void check_parameters(StackNode* ,hash_element* ,node_t * );
 
+int check_input_output(StackNode *, hash_element *);
+
 int get_decl_args(StackNode * stack, char * name);
 
 parameter* fun_table_type_decl(StackNode *, char *);
@@ -58,5 +60,7 @@ int cont_call_args(node_t*, int*);
 void store_literal(hash_element** id_stored, lexeme_t* id, int nature);
 
 int get_param_type_list(node_t* node, ElementList** root);
+
+hash_element *store_lit(lexeme_t *, int );
 
 #endif // MISC_H_

@@ -84,6 +84,16 @@ void print_ERR_WRONG_TYPE_ARGS(hash_element* id, int dectype, char* paramname, i
 
 }
 
+void print_ERR_WRONG_PAR_INPUT(hash_element* id, int type){
+   fprintf(stderr, "Line %d \033[1;31m ERR_WRONG_PAR_INPUT:\033[0m ", id->line);
+   fprintf(stderr, "input expected \033[1;32mint\033[0m or \033[1;32mfloat\033[0m but is\033[1;31m %s\033[0m.\n",  args_type(type));
+}
+
+void print_ERR_WRONG_PAR_OUTPUT(hash_element* id, int type){
+   fprintf(stderr, "Line %d \033[1;31m ERR_WRONG_PAR_OUTPUT:\033[0m ", id->line);
+   fprintf(stderr, "output expected \033[1;32mint\033[0m or \033[1;32mfloat\033[0m but is\033[1;31m %s\033[0m.\n",  args_type(type));
+}
+
 char* args_type(int type){
 
     switch (type)
@@ -100,3 +110,4 @@ char* args_type(int type){
         return "string";
     }
 }
+

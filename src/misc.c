@@ -200,7 +200,6 @@ void check_parameters(StackNode *global_scope, hash_element *stored_fun, node_t 
         else
         {
             typecall = topel->type;
-            fprintf(stderr, "%d\n", typecall);
         }
         if (typedecl[i].type != typecall)
         {
@@ -208,6 +207,20 @@ void check_parameters(StackNode *global_scope, hash_element *stored_fun, node_t 
         }
         pop_element(&list);
     }
+}
+
+int check_input_output(StackNode *global_scope, hash_element *stored_elem)
+{
+        int typecall;
+        if (stored_elem->nature < 3)
+        {
+            typecall = search_type(global_scope, stored_elem->name);
+        }
+        if (typecall == 258 || typecall == 259)
+        {
+            return -1;
+        }
+    return typecall;
 }
 
 int get_decl_args(StackNode *stack, char *name)
@@ -306,41 +319,49 @@ int get_param_type_list(node_t *node, ElementList **root)
         {
             if (node->node_type >= 3 && node->node_type < 9)
             {
-                char *name = malloc(1000);
-                switch (node->node_type)
-                {
-                case NAT_INT:
-                    sprintf(name, "%d", node->lex_value->val.d);
-                    param->type = 258;
-                    break;
-                case NAT_FLOAT:
-                    sprintf(name, "%f", node->lex_value->val.f);
-                    param->type = 259;
-                    break;
-                case NAT_TRUE:
-                    sprintf(name, "true");
-                    param->type = 260;
-                    break;
-                case NAT_FALSE:
-                    sprintf(name, "false");
-                    param->type = 260;
-                    break;
-                case NAT_CHAR:
-                    sprintf(name, "%s", node->lex_value->val.s);
-                    param->type = 261;
-                    break;
-                case NAT_STR:
-                    sprintf(name, "%s", node->lex_value->val.s);
-                    param->type = 262;
-                    break;
-                }
-                param->name = name;
-                param->line = node->lex_value->line;
-                param->val = node->lex_value->val;
+                param = store_lit(node->lex_value, node->node_type);
                 param->nature = node->node_type;
             }
         }
 
         push_element(root, param);
     }
+}
+
+hash_element *store_lit(lexeme_t *lit, int node_type)
+{
+    hash_element* element = (hash_element*)malloc(sizeof(hash_element));
+    char *name = malloc(1000);
+    switch (node_type)
+    {
+    case NAT_INT:
+        sprintf(name, "%d", lit->val.d);
+        element->type = 258;
+        break;
+    case NAT_FLOAT:
+        sprintf(name, "%f", lit->val.f);
+        element->type = 259;
+        break;
+    case NAT_TRUE:
+        sprintf(name, "true");
+        element->type = 260;
+        break;
+    case NAT_FALSE:
+        sprintf(name, "false");
+        element->type = 260;
+        break;
+    case NAT_CHAR:
+        sprintf(name, "%s", lit->val.s);
+        element->type = 261;
+        break;
+    case NAT_STR:
+        sprintf(name, "%s", lit->val.s);
+        element->type = 262;
+        break;
+    }
+    element->name = name;
+    element->line = lit->line;
+    element->val = lit->val;
+
+    return element;
 }

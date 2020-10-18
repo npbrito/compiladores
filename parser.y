@@ -445,8 +445,18 @@ DestroyScope: '}' { hash_print(top(global_scope)); pop(&global_scope);}
 
 Cmd: LocalVarDecl            { $$ = $1;                         }
    | Assignment              { $$ = $1;                         }
-   | TK_PR_INPUT IDArray     { $$ = create_node(INP,$1, 1, $2);     }
-   | TK_PR_OUTPUT IDArray    { $$ = create_node(OUT,$1, 1, $2);     }
+   | TK_PR_INPUT IDArray     { $$ = create_node(INP,$1, 1, $2);     
+                              int ok = check_input_output(global_scope, stored_element);
+                              if(ok != -1)
+                              {
+                                  print_ERR_WRONG_PAR_OUTPUT(stored_element, ok);
+                              }}
+   | TK_PR_OUTPUT IDArray    { $$ = create_node(OUT,$1, 1, $2);     
+                                int ok = check_input_output(global_scope, stored_element);
+                              if(ok != -1)
+                              {
+                                  print_ERR_WRONG_PAR_INPUT(stored_element, ok);
+                              }}
    | TK_PR_OUTPUT Lit        { $$ = create_node(OUT,$1, 1, $2);     }
    | CmdBlock                { $$ = $1;                         }
    | FuncCall                { $$ = $1;                         }
