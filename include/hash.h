@@ -39,6 +39,32 @@ typedef struct HashTable{
 
 } HashTable;
 
+/* The stacks will represent the different scopes.
+ * Each element of the stack will be a hash table that represents the
+ * symbol table. */
+typedef struct StackNode { 
+    HashTable* symbol_table; 
+    struct StackNode* next; 
+} StackNode; 
+
+/* Initialize a stack */
+StackNode *create_stack(HashTable**);
+
+/* Check if the stack is empty */
+int isEmpty( StackNode*);
+
+/* Add an item to the stack */
+void push(StackNode**, HashTable*);
+
+/* Removes the item from the top of the stack */
+HashTable* pop(StackNode**);
+
+/* Returns the element at the top of the stack */
+HashTable* top(StackNode*);
+
+/* Returns the element at the bottom of the stack */
+HashTable* bottom(StackNode*);
+
 /* Create a empty hash table */
 HashTable* hash_create();
 
@@ -46,7 +72,7 @@ HashTable* hash_create();
 void hash_insert(HashTable**, hash_element*, int);
 
 /* Search if element exist in a table */
-int hash_search(HashTable*, char*);
+int hash_search(StackNode*, char*);
 
 /* Print a entire hash table */
 void hash_print(HashTable*);

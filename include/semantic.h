@@ -30,5 +30,9 @@
 
 void print_ERR_DECLARED(hash_element* ,int);
 void print_ERR_UNDECLARED(hash_element* );
+void print_ERR_VARIABLE(hash_element* , int previous_nature);
+void print_ERR_VECTOR(hash_element* , int previous_nature);
+void print_ERR_FUNCTION(hash_element* , int previous_nature);
+void print_ERR_NUM_ARGS(hash_element* , int args_decl, int args_call);
 
 #endif // SEMANTIC_H_

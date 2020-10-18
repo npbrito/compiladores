@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "hash.h"
-#include "stack.h"
 #include "tree.h"
 
 extern int yyparse(void);

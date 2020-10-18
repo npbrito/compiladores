@@ -8,6 +8,7 @@
 
 #include "misc.h"
 #include "list.h"
+#include "hash.h"
 
 void store_identificador(hash_element** id_stored, lexeme_t* id){
     hash_element* aux = (hash_element*)malloc(sizeof(hash_element));
@@ -65,4 +66,72 @@ void store_param(hash_element** stored_fun, ElementList* param_list){
     i++;
     }}
     *stored_fun = fun;
+}
+
+int id_nature(StackNode* stack, char* name){
+    HashTable * table = bottom(stack);
+    int index = calc_index(name);
+    int elements_searched = 0;
+    while(table[index].value != NULL && elements_searched < HASH_SIZE){
+        if(strcmp(name, table[index].value->name) == 0)
+            return table[index].value->nature;
+        if(index < HASH_SIZE){
+            index++;
+        }
+        else
+        {
+            index = 0;
+        }
+            elements_searched++;        
+   }
+   // depois procura no escopo local 
+   table = top(stack);
+     elements_searched = 0;
+    while(table[index].value != NULL && elements_searched < HASH_SIZE){
+        if(strcmp(name, table[index].value->name) == 0)
+            return table[index].value->nature ;
+        if(index < HASH_SIZE){
+            index++;
+        }
+        else
+        {
+            index = 0;
+        }
+            elements_searched++;        
+   }
+}
+
+
+int get_decl_args(StackNode * stack, char* name){
+    HashTable * table = bottom(stack);
+    int index = calc_index(name);
+    int elements_searched = 0;
+    while(table[index].value != NULL && elements_searched < HASH_SIZE){
+        if(strcmp(name, table[index].value->name) == 0)
+            return table[index].value->function_args ;
+        if(index < HASH_SIZE){
+            index++;
+        }
+        else
+        {
+            index = 0;
+        }
+            elements_searched++;    
+        fprintf(stderr, " %d \n\n",elements_searched);
+    
+   }
+}
+
+int cont_call_args(node_t* list, int *args){
+    if (list == NULL){
+    return 0; 
+    }
+    else
+    {    
+    for (int i=0; i<MAX_CHILDREN; i++) {
+    node_t *child = list->children[i];
+    cont_call_args(child, args);
+    }
+    *args+=1;
+    }
 }

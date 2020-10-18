@@ -10,6 +10,58 @@
 #include "misc.h"
 #include "parser.tab.h"
 
+
+StackNode *create_stack(HashTable** new_data){
+    StackNode* stackNode = (StackNode*)malloc(sizeof(StackNode)); 
+    stackNode->symbol_table = *new_data; 
+    stackNode->next = NULL; 
+    return stackNode; 
+}
+
+int isEmpty(StackNode* root) 
+{ 
+    return !root; 
+} 
+
+void push(StackNode** root, HashTable * data){
+    StackNode* topNode = create_stack(&data);
+    // Empurra a raiz pra baixo do novo elemento da pilha
+    topNode->next = *root;
+    *root = topNode;
+}
+
+HashTable* pop(StackNode** root){
+    if (isEmpty(*root)) 
+        return NULL; 
+    StackNode* temp = *root; 
+    *root = (*root)->next; 
+    HashTable* popped = temp->symbol_table; 
+    free(temp); 
+    return popped; 
+}
+
+HashTable* top(StackNode* root){
+    return root->symbol_table; 
+}
+
+HashTable* bottom(StackNode* root){
+    StackNode* last_stack = NULL;
+    HashTable* last_table = NULL;
+    // desempilahndo até o ultimo elemento
+    int i = 0;
+    while(!isEmpty(root)){
+        push(&last_stack, pop(&root));
+    }
+    last_table = top(last_stack);
+    // empilhando
+    while(!isEmpty(last_stack)){
+        push(&root, pop(&last_stack));
+    }
+    return last_table;
+}
+
+//--------------------------------------------------------
+
 int stored_nature = 0;
 
 HashTable* hash_create(){
@@ -61,10 +113,27 @@ void hash_insert(HashTable** root, hash_element* newElement, int type){
     }
 }
 
-int hash_search(HashTable* table, char* name){
-   int index = calc_index(name);
-   int elements_searched = 0;
-   while(table[index].value != NULL && elements_searched < HASH_SIZE){
+int hash_search(StackNode* stack, char* name){
+    // primeiro procurano escopo global
+    HashTable * table = bottom(stack);
+    int index = calc_index(name);
+    int elements_searched = 0;
+    while(table[index].value != NULL && elements_searched < HASH_SIZE){
+        if(strcmp(name, table[index].value->name) == 0)
+            return table[index].value->line ;
+        if(index < HASH_SIZE){
+            index++;
+        }
+        else
+        {
+            index = 0;
+        }
+            elements_searched++;        
+   }
+   // depois procura no escopo local 
+   table = top(stack);
+     elements_searched = 0;
+    while(table[index].value != NULL && elements_searched < HASH_SIZE){
         if(strcmp(name, table[index].value->name) == 0)
             return table[index].value->line ;
         if(index < HASH_SIZE){
@@ -114,15 +183,15 @@ int calc_type_size(int type){
     int size = 0;
     switch (type)
     {
-    case TK_PR_INT: size = sizeof(int);
+    case TK_PR_INT: size = 4;
         break;
-    case TK_PR_FLOAT: size = sizeof(float);
+    case TK_PR_FLOAT: size = 8;
         break;
-    case TK_PR_BOOL:  size = sizeof(bool);
+    case TK_PR_BOOL:  size = 1;
         break;
-    case TK_PR_CHAR: size = sizeof(char);
+    case TK_PR_CHAR: size = 1;
         break;
-    case TK_PR_STRING: size = sizeof(char*);
+    case TK_PR_STRING: size = 1;
         break;
     }
     return size;

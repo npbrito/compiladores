@@ -23,4 +23,12 @@ void store_function_elem(hash_element**);
 
 void store_param(hash_element**, ElementList*);
 
+int id_nature(StackNode*, char* );
+
+int get_decl_args(StackNode * stack, char * name);
+
+int check_fun_args(ElementList*);
+
+int cont_call_args(node_t*, int*);
+
 #endif // MISC_H_

@@ -7,7 +7,6 @@
 #include <string.h>
 #include "tree.h"
 #include "hash.h"
-#include "stack.h"
 #include "list.h"
 #include "misc.h"
 #include "semantic.h"
@@ -22,7 +21,6 @@ ElementList* var_list = NULL;
 ElementList* param_list = NULL;
 hash_element* stored_element = NULL;
 hash_element* stored_fun = NULL;
-extern HashTable * table;
 
 %}
 
@@ -126,6 +124,7 @@ extern HashTable * table;
 %type <type> TypeConst
 // FUNCTIONS AND VARIABLES
 %type <tree_node> FuncDecl
+%type <tree_node> FuncHead
 %type <tree_node> ParamsDecl
 %type <tree_node> ParamDeclList
 %type <tree_node> ParamDecl
@@ -170,7 +169,8 @@ Start: Init Program End { arvore = $2; }
     ;
 Program: %empty                    { $$ = NULL;             }
        | GlobalVarDecl ';' Program { $$ = $3;               }
-       | FuncDecl Program          { $$ = add_node($1, $2); }
+       | FuncDecl Program          { $$ = add_node($1, $2); 
+}
        ;
 
 /*********************
@@ -181,21 +181,36 @@ ID: TK_IDENTIFICADOR { store_identificador(&stored_element, $1);
                         $$ = create_node($1, 0);
                     }
   ;
-IDArray: ID              { $$ = $1;                             
-                         HashTable *table = top(global_scope);
+IDArray: ID              { $$ = $1;  
                          store_nature(&stored_element, NAT_VAR);
-                            int already_on_table = hash_search(table, stored_element->name);
+                            int already_on_table = hash_search(global_scope, stored_element->name);
                             if(already_on_table == 0){
                                 print_ERR_UNDECLARED(stored_element);
-                            }}
-       | ID '[' Expr ']' { replace_name($2, "[]");
-                           $$ = create_node($2, 2, $1, $3);
-                            HashTable *table = top(global_scope);
+                            }
+                            else{
+                                int previous_nature = id_nature(global_scope, stored_element->name);
+                                if(previous_nature != 0)
+                                {
+                                    print_ERR_VARIABLE(stored_element, previous_nature);
+                                }
+                            }
+                        }
+       | ID '[' Expr ']' { 
+                            replace_name($2, "[]");
+                            $$ = create_node($2, 2, $1, $3);
                             store_nature(&stored_element, NAT_VET);
-                            int already_on_table = hash_search(table, stored_element->name);
+                            int already_on_table = hash_search(global_scope, stored_element->name);
                             if(already_on_table == 0){
                                 print_ERR_UNDECLARED(stored_element);
-                            }}
+                            }
+                            else{
+                                int previous_nature = id_nature(global_scope, stored_element->name);
+                                if(previous_nature != 1)
+                                {
+                                    print_ERR_VECTOR(stored_element, previous_nature);
+                                }
+                            }
+                            }
        ;
 FunID: TK_IDENTIFICADOR { store_identificador(&stored_fun, $1); 
                         $$ = create_node($1, 0);
@@ -239,13 +254,15 @@ TypeStaticConst: TypeBase                          {}
  ***************************/
 
 /* Function declaration */
-FuncDecl: TypeStatic FunID '(' ParamsDecl ')' CmdBlock { 
-    $$ = add_node($2, $6);   
+FuncDecl: FuncHead CmdBlock {
+                            add_node($1, $2);}
+                            ;
+FuncHead: TypeStatic FunID '(' ParamsDecl ')'  { 
                                                     store_function_elem(&stored_fun);
                                                     store_param(&stored_fun,param_list);
-                                                    param_list = NULL;
-                                                    HashTable *table = top(global_scope);   
-                                                    int already_on_table = hash_search(table, stored_fun->name);
+                                                    HashTable * table = top(global_scope);
+                                                    param_list = NULL;  
+                                                    int already_on_table = hash_search(global_scope, stored_fun->name);
                                                     if (already_on_table == 0){
                                                     hash_insert(&table, stored_fun, $1);
                                                     }                                            
@@ -253,6 +270,7 @@ FuncDecl: TypeStatic FunID '(' ParamsDecl ')' CmdBlock {
                                                     // NÃO COLOCAR NA ÁRVORE CASO TIVER ERRO
                                                     print_ERR_DECLARED(stored_fun ,already_on_table);
                                             }
+                                            $$ = $2;   
 }
         ;
 ParamsDecl: %empty        {}
@@ -267,11 +285,26 @@ ParamDecl: TypeConst TK_IDENTIFICADOR { store_identificador(&stored_element,$2);
          ;
 
 /* Function call */
-FuncCall: ID '(' ParamsCall ')' { ($1)->lex_value->type = TYPE_FUNC_CALL; $$ = add_node($1, $3); 
-                                HashTable *table_global = bottom(global_scope);
+FuncCall: ID '(' ParamsCall ')' { 
+                                ($1)->lex_value->type = TYPE_FUNC_CALL; $$ = add_node($1, $3); 
                                 store_nature(&stored_element, NAT_FUN);
-                                int already_on_table = hash_search(table_global, stored_element->name);                                if (already_on_table == 0){
-                                    print_ERR_UNDECLARED(stored_element);
+                                int already_on_table = hash_search(global_scope, stored_element->name);                               
+                                if(already_on_table == 0){
+                                print_ERR_UNDECLARED(stored_element);
+                                }
+                                else{
+                                int previous_nature = id_nature(global_scope, stored_element->name);
+                                if(previous_nature != 2)
+                                {
+                                    print_ERR_FUNCTION(stored_element, previous_nature);
+                                }
+                                stored_fun = stored_element;
+                                }
+                               int call_args = 0;
+                               cont_call_args($3, &call_args);
+                               int decl_args =  get_decl_args(global_scope, stored_fun->name);
+                                if(decl_args != call_args){
+                                print_ERR_NUM_ARGS(stored_fun, decl_args, call_args);
                                 }
                                 }
         ;
@@ -283,12 +316,13 @@ ParamCallList: Expr                   { $$ = $1;               }
              ;
 
 /* Global variable declaration */
-GlobalVarDecl: TypeStatic GlobalVarList { HashTable *table = top(global_scope);
+GlobalVarDecl: TypeStatic GlobalVarList {  HashTable * table = top(global_scope);
                                             while(!isEmpty_stack_list(var_list)){
                                             hash_element* element = pop_element(&var_list);
-                                            int already_on_table = hash_search(table, element->name);
+                                            int already_on_table = hash_search(global_scope, element->name);
                                             if(already_on_table == 0){
-                                            hash_insert(&table, element, $1);}
+                                            hash_insert(&table, element, $1);
+                                            }
                                             else{
                                                 print_ERR_DECLARED(element ,already_on_table);
                                                 }
@@ -309,10 +343,10 @@ GlobalVar: ID      {store_nature(&stored_element, NAT_VAR);
 /* Local variable declaration */
 LocalVarDecl: 
              TypeStaticConst LocalVarList { $$ = $2; 
-                                        HashTable *table = top(global_scope);
+             HashTable * table = top(global_scope);
                                         while(!isEmpty_stack_list(var_list)){
                                             hash_element* element = pop_element(&var_list);
-                                            int already_on_table = hash_search(table, element->name);
+                                            int already_on_table = hash_search(global_scope, element->name);
                                             if(already_on_table == 0){
                                             hash_insert(&table, element, $1);}
                                             else{
