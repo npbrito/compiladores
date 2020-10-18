@@ -134,4 +134,33 @@ int cont_call_args(node_t* list, int *args){
     }
     *args+=1;
     }
+} 
+
+void store_literal(hash_element** id_stored, lexeme_t* id, int nature)
+{
+    hash_element* aux = (hash_element*)malloc(sizeof(hash_element));
+    char *name = malloc(1000);
+    switch (nature)
+    {
+    case NAT_INT: sprintf(name, "%d", id->val.d);
+        break;
+    case NAT_FLOAT: sprintf(name, "%f", id->val.f);
+        break;
+    case NAT_TRUE: sprintf(name, "true");
+        break;
+    case NAT_FALSE: sprintf(name, "false");
+        break;
+    case NAT_CHAR: sprintf(name, "%s", id->val.s);
+        break;
+    case NAT_STR: sprintf(name, "%s", id->val.s);
+        break;
+    
+    default:
+        break;
+    }
+    aux->name = name; 
+    aux->line = id->line;
+    aux->nature = nature;
+    aux->val = id->val;
+    *id_stored = aux;
 }

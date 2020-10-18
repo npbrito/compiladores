@@ -1,7 +1,9 @@
 int glv[5];
 int main(int y, char j){
-    int j;
-    main(h, i);
+    int j <= 'a';
+    int j <= false;
+    int j <= "MYSTRING";
+    int j <= 2;
 }
 
 

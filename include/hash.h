@@ -68,8 +68,7 @@ HashTable* bottom(StackNode*);
 /* Create a empty hash table */
 HashTable* hash_create();
 
-/* Insert elelement hash_element* to a table */
-void hash_insert(HashTable**, hash_element*, int);
+void hash_insert(HashTable**, hash_element*, int type);
 
 /* Search if element exist in a table */
 int hash_search(StackNode*, char*);
@@ -82,5 +81,8 @@ int calc_index(char*);
 
 /* Return the sizeof of that type */
 int calc_type_size(int);
+
+char * get_lit_name(hash_element *newElement);
+
 
 #endif // HASH_H_

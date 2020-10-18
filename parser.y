@@ -20,6 +20,7 @@ StackNode* global_scope = NULL;
 ElementList* var_list = NULL;
 ElementList* param_list = NULL;
 hash_element* stored_element = NULL;
+hash_element* stored_literal = NULL;
 hash_element* stored_fun = NULL;
 
 %}
@@ -216,12 +217,34 @@ FunID: TK_IDENTIFICADOR { store_identificador(&stored_fun, $1);
                         $$ = create_node($1, 0);
                     }
 
-Lit: TK_LIT_INT    { $$ = create_node($1, 0);}
-   | TK_LIT_FLOAT  { $$ = create_node($1, 0);}
-   | TK_LIT_TRUE   { $$ = create_node($1, 0);}
-   | TK_LIT_FALSE  { $$ = create_node($1, 0);}
-   | TK_LIT_CHAR   { $$ = create_node($1, 0);}
-   | TK_LIT_STRING { $$ = create_node($1, 0);}
+Lit: TK_LIT_INT    { $$ = create_node($1, 0);
+                    store_literal(&stored_literal, $1, NAT_INT);
+                    HashTable * table = top(global_scope);
+                    hash_insert(&table, stored_literal,TK_PR_INT);
+
+                    }
+   | TK_LIT_FLOAT  { $$ = create_node($1, 0);
+                    store_literal(&stored_literal, $1, NAT_FLOAT);
+                    HashTable * table = top(global_scope);
+                    hash_insert(&table, stored_literal,TK_PR_FLOAT);
+}
+   | TK_LIT_TRUE   { $$ = create_node($1, 0);
+                    store_literal(&stored_literal, $1, NAT_TRUE);
+                    HashTable * table = top(global_scope);
+                    hash_insert(&table, stored_literal,TK_PR_BOOL);}
+   | TK_LIT_FALSE  { $$ = create_node($1, 0);
+                     store_literal(&stored_literal, $1, NAT_FALSE);
+                    HashTable * table = top(global_scope);
+                    hash_insert(&table, stored_literal,TK_PR_BOOL);}
+   | TK_LIT_CHAR   { $$ = create_node($1, 0);
+                    store_literal(&stored_literal, $1, NAT_CHAR);
+                    HashTable * table = top(global_scope);
+                    hash_insert(&table, stored_literal,TK_PR_CHAR);}
+   | TK_LIT_STRING { $$ = create_node($1, 0);
+                    store_literal(&stored_literal, $1, NAT_STR);
+                    HashTable * table = top(global_scope);
+                    hash_insert(&table, stored_literal,TK_PR_CHAR);
+                    }
    ;
 Int: TK_LIT_INT { $$ = create_node($1, 0); }
    ;
