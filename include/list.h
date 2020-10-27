@@ -32,4 +32,8 @@ hash_element* top_element(ElementList*);
 /* Add a parameter to the stack */
 void push_param(ElementList**, hash_element*, int type);
 
+void push_exp(ElementList** root, hash_element* data);
+
+ElementList* reverse_list(ElementList *list);
+
 #endif //LIST_H_

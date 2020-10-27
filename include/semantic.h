@@ -37,6 +37,11 @@ void print_ERR_NUM_ARGS(hash_element* , int args_decl, int args_call);
 void print_ERR_WRONG_TYPE_ARGS(hash_element* , int,char*, int);
 void print_ERR_WRONG_PAR_INPUT(hash_element* id, int);
 void print_ERR_WRONG_PAR_OUTPUT(hash_element* id, int);
+void print_ERR_WRONG_EXP_TYPES(int line,char*,int,char*, int);
+void print_ERR_WRONG_PAR_RETURN(hash_element*, int type, int line);
+void print_ERR_WRONG_ASS_TYPE(int line, int type, int wrongtype);
+void print_ERR_CHAR_TO_X(lexeme_t*, int wrongtype);
+void print_ERR_STRING_TO_X(lexeme_t*, int wrongtype);
 char* args_type(int type);
 
 

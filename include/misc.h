@@ -41,17 +41,9 @@ void store_function_elem(hash_element**);
 
 void store_param(hash_element**, ElementList*);
 
-int id_nature(StackNode*, char* );
-
-int search_type(StackNode *, char *);
-
 void check_parameters(StackNode* ,hash_element* ,node_t * );
 
 int check_input_output(StackNode *, hash_element *);
-
-int get_decl_args(StackNode * stack, char * name);
-
-parameter* fun_table_type_decl(StackNode *, char *);
 
 int check_fun_args(ElementList*);
 
@@ -62,5 +54,9 @@ void store_literal(hash_element** id_stored, lexeme_t* id, int nature);
 int get_param_type_list(node_t* node, ElementList** root);
 
 hash_element *store_lit(lexeme_t *, int );
+
+int check_exp_type(ElementList*, StackNode*);
+
+lexeme_t* get_node_name(node_t *node, lexeme_t **name);
 
 #endif // MISC_H_

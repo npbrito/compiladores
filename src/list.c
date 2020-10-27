@@ -51,3 +51,19 @@ void push_param(ElementList** root, hash_element* data, int type){
     topNode->next = *root;
     *root = topNode;
 }
+
+void push_exp(ElementList** root, hash_element* data){
+    ElementList* topNode = create_stack_list(&data);
+
+    // Empurra a raiz pra baixo do novo elemento da pilha
+    topNode->next = *root;
+    *root = topNode;
+}
+
+ElementList* reverse_list(ElementList *list){
+    ElementList* aux = NULL;    
+     while(!isEmpty_stack_list(list)){
+         push_element(&aux, pop_element(&list));
+     }
+    return aux;   
+}

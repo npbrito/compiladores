@@ -7,7 +7,7 @@
 #include "tree.h"
 
 // Hash table size 
-#define HASH_SIZE 10
+#define HASH_SIZE 1000
 
 typedef struct parameter
 {
@@ -26,7 +26,7 @@ typedef struct hash_element{
     int vet_size;
     union Literal val;
     // For functions
-    int function_args;
+    int args_n;
     parameter* function_param;
 
 } hash_element;
@@ -71,7 +71,7 @@ HashTable* hash_create();
 void hash_insert(HashTable**, hash_element*, int type);
 
 /* Search if element exist in a table */
-int hash_search(StackNode*, char*);
+hash_element* hash_search(StackNode *stack, char *name);
 
 /* Print a entire hash table */
 void hash_print(HashTable*);

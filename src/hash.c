@@ -151,7 +151,7 @@ void hash_insert(HashTable **root, hash_element *newElement, int type)
     *root = table;
 }
 
-int hash_search(StackNode *stack, char *name)
+hash_element* hash_search(StackNode *stack, char *name)
 {
     // primeiro procurano escopo global
     HashTable *table = bottom(stack);
@@ -160,7 +160,7 @@ int hash_search(StackNode *stack, char *name)
     while (table[index].value != NULL && elements_searched < HASH_SIZE)
     {
         if (strcmp(name, table[index].value->name) == 0)
-            return table[index].value->line;
+            return table[index].value;
         if (index < HASH_SIZE)
         {
             index++;
@@ -177,7 +177,7 @@ int hash_search(StackNode *stack, char *name)
     while (table[index].value != NULL && elements_searched < HASH_SIZE)
     {
         if (strcmp(name, table[index].value->name) == 0)
-            return table[index].value->line;
+            return table[index].value;
         if (index < HASH_SIZE)
         {
             index++;
@@ -188,7 +188,7 @@ int hash_search(StackNode *stack, char *name)
         }
         elements_searched++;
     }
-    return 0;
+    return NULL;
 }
 
 void hash_print(HashTable *table)

@@ -10,6 +10,7 @@
 #include "list.h"
 #include "semantic.h"
 #include "hash.h"
+#include "parser.tab.h"
 
 void store_identificador(hash_element **id_stored, lexeme_t *id)
 {
@@ -59,7 +60,7 @@ void store_param(hash_element **stored_fun, ElementList *param_list)
         push_element(&aux, pop_element(&param_list));
         args_cont++;
     }
-    fun->function_args = args_cont;
+    fun->args_n = args_cont;
     /*if(top_e->name == NULL){
     fprintf(stderr, "param list = NULL \n");}*/
     if (args_cont > 0)
@@ -78,124 +79,26 @@ void store_param(hash_element **stored_fun, ElementList *param_list)
     *stored_fun = fun;
 }
 
-int id_nature(StackNode *stack, char *name)
-{
-    HashTable *table = bottom(stack);
-    int index = calc_index(name);
-    int elements_searched = 0;
-    while (table[index].value != NULL && elements_searched < HASH_SIZE)
-    {
-        if (strcmp(name, table[index].value->name) == 0)
-            return table[index].value->nature;
-        if (index < HASH_SIZE)
-        {
-            index++;
-        }
-        else
-        {
-            index = 0;
-        }
-        elements_searched++;
-    }
-    // depois procura no escopo local
-    table = top(stack);
-    elements_searched = 0;
-    while (table[index].value != NULL && elements_searched < HASH_SIZE)
-    {
-        if (strcmp(name, table[index].value->name) == 0)
-            return table[index].value->nature;
-        if (index < HASH_SIZE)
-        {
-            index++;
-        }
-        else
-        {
-            index = 0;
-        }
-        elements_searched++;
-    }
-}
-parameter *fun_table_type_decl(StackNode *stack, char *name)
-{
-    HashTable *table = bottom(stack);
-    int index = calc_index(name);
-    int elements_searched = 0;
-    while (table[index].value != NULL && elements_searched < HASH_SIZE)
-    {
-        if (strcmp(name, table[index].value->name) == 0)
-            return table[index].value->function_param;
-        if (index < HASH_SIZE)
-        {
-            index++;
-        }
-        else
-        {
-            index = 0;
-        }
-        elements_searched++;
-    }
-    return 0;
-}
-
-int search_type(StackNode *stack, char *name)
-{
-    HashTable *table = bottom(stack);
-    int index = calc_index(name);
-    int elements_searched = 0;
-    while (table[index].value != NULL && elements_searched < HASH_SIZE)
-    {
-        if (strcmp(name, table[index].value->name) == 0)
-            return table[index].value->type;
-        if (index < HASH_SIZE)
-        {
-            index++;
-        }
-        else
-        {
-            index = 0;
-        }
-        elements_searched++;
-    }
-    // depois procura no escopo local
-    table = top(stack);
-    elements_searched = 0;
-    while (table[index].value != NULL && elements_searched < HASH_SIZE)
-    {
-        if (strcmp(name, table[index].value->name) == 0)
-            return table[index].value->type;
-        if (index < HASH_SIZE)
-        {
-            index++;
-        }
-        else
-        {
-            index = 0;
-        }
-        elements_searched++;
-    }
-    return 0;
-}
-
 void check_parameters(StackNode *global_scope, hash_element *stored_fun, node_t *param_call)
 {
     int call_args = 0;
     cont_call_args(param_call, &call_args);
-    int decl_args = get_decl_args(global_scope, stored_fun->name);
-    if (decl_args != call_args)
+    hash_element* function_declared = hash_search(global_scope, stored_fun->name);
+    if (function_declared->args_n != call_args)
     {
-        print_ERR_NUM_ARGS(stored_fun, decl_args, call_args);
+        print_ERR_NUM_ARGS(stored_fun, function_declared->args_n, call_args);
     }
     ElementList *list = NULL;
     get_param_type_list(param_call, &list);
     // verificar na tabla hash
-    parameter *typedecl = fun_table_type_decl(global_scope, stored_fun->name);
-    for (int i = 0; i < decl_args; i++)
+    parameter *typedecl = hash_search(global_scope, stored_fun->name)->function_param;
+    for (int i = 0; i < function_declared->args_n; i++)
     {
         hash_element *topel = top_element(list);
         int typecall;
         if (topel->nature < 3)
         {
-            typecall = search_type(global_scope, topel->name);
+            typecall = hash_search(global_scope, topel->name)->type;
         }
         else
         {
@@ -214,35 +117,13 @@ int check_input_output(StackNode *global_scope, hash_element *stored_elem)
         int typecall;
         if (stored_elem->nature < 3)
         {
-            typecall = search_type(global_scope, stored_elem->name);
+            typecall = hash_search(global_scope, stored_elem->name)->type;
         }
         if (typecall == 258 || typecall == 259)
         {
             return -1;
         }
     return typecall;
-}
-
-int get_decl_args(StackNode *stack, char *name)
-{
-    HashTable *table = bottom(stack);
-    int index = calc_index(name);
-    int elements_searched = 0;
-    while (table[index].value != NULL && elements_searched < HASH_SIZE)
-    {
-        if (strcmp(name, table[index].value->name) == 0)
-            return table[index].value->function_args;
-        if (index < HASH_SIZE)
-        {
-            index++;
-        }
-        else
-        {
-            index = 0;
-        }
-        elements_searched++;
-        fprintf(stderr, " %d \n\n", elements_searched);
-    }
 }
 
 int cont_call_args(node_t *list, int *args)
@@ -270,21 +151,27 @@ void store_literal(hash_element **id_stored, lexeme_t *id, int nature)
     {
     case NAT_INT:
         sprintf(name, "%d", id->val.d);
+        aux->type = TK_PR_INT;
         break;
     case NAT_FLOAT:
         sprintf(name, "%f", id->val.f);
+        aux->type = TK_PR_FLOAT;
         break;
     case NAT_TRUE:
         sprintf(name, "true");
+        aux->type = TK_PR_BOOL;
         break;
     case NAT_FALSE:
         sprintf(name, "false");
+        aux->type = TK_PR_BOOL;
         break;
     case NAT_CHAR:
         sprintf(name, "%s", id->val.s);
+        aux->type = TK_PR_CHAR;
         break;
     case NAT_STR:
         sprintf(name, "%s", id->val.s);
+        aux->type = TK_PR_STRING;
         break;
     }
     aux->name = name;
@@ -336,27 +223,27 @@ hash_element *store_lit(lexeme_t *lit, int node_type)
     {
     case NAT_INT:
         sprintf(name, "%d", lit->val.d);
-        element->type = 258;
+        element->type = TK_PR_INT;
         break;
     case NAT_FLOAT:
         sprintf(name, "%f", lit->val.f);
-        element->type = 259;
+        element->type = TK_PR_FLOAT;
         break;
     case NAT_TRUE:
         sprintf(name, "true");
-        element->type = 260;
+        element->type = TK_PR_BOOL;
         break;
     case NAT_FALSE:
         sprintf(name, "false");
-        element->type = 260;
+        element->type = TK_PR_BOOL;
         break;
     case NAT_CHAR:
         sprintf(name, "%s", lit->val.s);
-        element->type = 261;
+        element->type = TK_PR_CHAR;
         break;
     case NAT_STR:
         sprintf(name, "%s", lit->val.s);
-        element->type = 262;
+        element->type = TK_PR_STRING;
         break;
     }
     element->name = name;
@@ -364,4 +251,75 @@ hash_element *store_lit(lexeme_t *lit, int node_type)
     element->val = lit->val;
 
     return element;
+}
+
+int check_exp_type(ElementList* exp_list, StackNode* stack){
+    hash_element * element;
+    int type_return;
+    int first_type, sec_type; 
+    // invertendo lista
+    exp_list = reverse_list(exp_list);
+    // pegando o primeiro elemento da expressão
+    char* first_name;
+    if(exp_list != NULL){
+    element = pop_element(&exp_list);
+    first_name = element->name;
+    first_type = hash_search(stack, element->name)->type;
+    type_return = first_type;
+    
+    }
+    while (!isEmpty_stack_list(exp_list))
+        {
+            element = pop_element(&exp_list);
+            sec_type = hash_search(stack, element->name)->type;
+            if (first_type == TK_PR_INT || first_type == TK_PR_FLOAT || first_type == TK_PR_BOOL){
+                if(sec_type >260){
+                    // tipo incopativel char ou string
+                    print_ERR_WRONG_EXP_TYPES(element->line,first_name,first_type, element->name,sec_type);
+                }
+                else{
+                    if(sec_type == TK_PR_FLOAT && type_return != TK_PR_FLOAT){
+                        type_return = TK_PR_FLOAT;
+                    }
+                    else
+                    {
+                        if(sec_type == TK_PR_INT && type_return != TK_PR_FLOAT){
+                        type_return = TK_PR_INT;
+                        }
+                        else{
+                            if(sec_type == TK_PR_INT && (type_return != TK_PR_FLOAT || type_return != TK_PR_INT)){
+                                type_return = TK_PR_BOOL;
+                            }
+                        }
+
+                    }
+                    
+                }
+            }else
+            {
+                if(first_type != sec_type){
+                    print_ERR_WRONG_EXP_TYPES(element->line,first_name,first_type, element->name,sec_type);
+                }
+                type_return = first_type;
+            }
+            
+        }
+    return type_return;
+}
+
+lexeme_t* get_node_name(node_t *node, lexeme_t **lex)
+{
+    if (node == NULL)
+    {
+        return 0;
+    }
+    else
+    {
+        for (int i = 0; i < MAX_CHILDREN; i++)
+        {
+            node_t *child = node->children[i];
+            get_node_name(child, lex);
+        }
+        *lex = node->lex_value;
+    }
 }
