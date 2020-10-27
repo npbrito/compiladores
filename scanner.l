@@ -1,5 +1,8 @@
-/* Natália Brito | 00274727 */
-/* Yuri Jaschek  | 00231592 */
+ /* ------------------------------------------------
+ * Author: Natália Paz Brito
+ * Email: npbrito@inf.ufrgs.br
+ * Date  : 2020-10-14
+ * ------------------------------------------------ */
 
 %{
 #include <stdio.h>
