@@ -1,10 +1,7 @@
-int glv[5];
 int main(int y, char j){
-    char j <= 'a';
-    int k <= 5;
-    main(k, 'h');
-    input k;
-    output k;
+    char f <= 'a';
+    int h <= 5;
+    y = h;
 }
 
 

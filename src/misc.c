@@ -49,6 +49,7 @@ void store_function_elem(hash_element **fun_stored)
 
 void store_param(hash_element **stored_fun, ElementList *param_list)
 {
+
     ElementList *aux = NULL;
     hash_element *fun = *stored_fun;
     hash_element *param;
@@ -71,6 +72,7 @@ void store_param(hash_element **stored_fun, ElementList *param_list)
         while (!isEmpty_stack_list(aux) && i < args_cont)
         {
             param = pop_element(&aux);
+            push_element(&param_list, param);
             fun->function_param[i].name = param->name;
             fun->function_param[i].type = param->type;
             i++;

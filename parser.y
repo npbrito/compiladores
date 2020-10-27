@@ -146,6 +146,7 @@ hash_element* stored_fun = NULL;
 // COMMANDS
 %type <tree_node> Cmd
 %type <tree_node> CmdBlock
+%type <tree_node> FunCmdBlock
 %type <tree_node> CmdSeq
 %type <tree_node> Assignment
 %type <tree_node> ControlFlow
@@ -276,18 +277,18 @@ TypeStaticConst: TypeBase                          {}
  ***************************/
 
 /* Function declaration */
-FuncDecl: FuncHead CmdBlock {
-                            add_node($1, $2);}
+FuncDecl: FuncHead FunCmdBlock {
+                            add_node($1, $2); }
                             ;
 FuncHead: TypeStatic FunID '(' ParamsDecl ')'  {    
                                                     stored_fundecl = stored_fun;
                                                     store_function_elem(&stored_fun);
-                                                    store_param(&stored_fun,param_list);
                                                     HashTable * table = top(global_scope);
-                                                    param_list = NULL;  
                                                     hash_element* element = hash_search(global_scope, stored_fun->name);
                                                     if (element == NULL){
+                                                    store_param(&stored_fun,param_list);
                                                     hash_insert(&table, stored_fun, $1);
+
                                                     }                                            
                                                     else{
                                                     // NÃO COLOCAR NA ÁRVORE CASO TIVER ERRO
@@ -439,6 +440,14 @@ UnarySet: '+' UnaryExpr UnarySet { $$ = create_node(EXP,$1, 1, $2, $3); }
  ************/
 CreateScope: '{' { push(&global_scope, hash_create());}
             ;
+CreateFunScope: '{' { push(&global_scope, hash_create());
+                            HashTable * table = top(global_scope);
+                            while(!isEmpty_stack_list(param_list)){
+                            hash_element* param_element = pop_element(&param_list);
+                            hash_insert(&table, param_element, param_element->type);
+                            }
+                            param_list = NULL; }
+            ;
 DestroyScope: '}' {pop(&global_scope);}
                 ;
 
@@ -474,6 +483,9 @@ Cmd: LocalVarDecl            { $$ = $1;                         }
    ;
 CmdBlock: CreateScope CmdSeq DestroyScope { $$ = $2;}
         ;
+
+FunCmdBlock: CreateFunScope CmdSeq DestroyScope { $$ = $2;}
+        ; 
 CmdSeq: %empty          { $$ = NULL;                                   }
       | Cmd ';' CmdSeq  { $$ = ($1) == NULL ? ($3) : add_node($1, $3); }
       ;

@@ -7,7 +7,7 @@
 #include "tree.h"
 
 // Hash table size 
-#define HASH_SIZE 1000
+#define HASH_SIZE 10
 
 typedef struct parameter
 {
