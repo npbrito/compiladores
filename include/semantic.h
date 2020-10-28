@@ -40,8 +40,8 @@ void print_ERR_WRONG_PAR_OUTPUT(hash_element* id, int);
 void print_ERR_WRONG_EXP_TYPES(int line,char*,int,char*, int);
 void print_ERR_WRONG_PAR_RETURN(hash_element*, int type, int line);
 void print_ERR_WRONG_ASS_TYPE(int line, int type, int wrongtype);
-void print_ERR_CHAR_TO_X(lexeme_t*, int wrongtype);
-void print_ERR_STRING_TO_X(lexeme_t*, int wrongtype);
+void print_ERR_CHAR_TO_X(int line, char*, int wrongtype);
+void print_ERR_STRING_TO_X(int line, char*, int wrongtype);
 char* args_type(int type);
 
 

@@ -33,6 +33,10 @@ int set_lex_value(int token)
             yylval.lex_value->val.b = token == TK_LIT_TRUE;
             break;
         case TK_LIT_CHAR:
+            str = strdup(yytext+1);
+            str[strlen(str)-1] = '\0';
+            yylval.lex_value->val.c = str;
+            break;
         case TK_LIT_STRING:
             str = strdup(yytext+1);
             str[strlen(str)-1] = '\0';

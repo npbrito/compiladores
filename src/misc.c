@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 #include "misc.h"
-#include "list.h"
+#include "element_stack.h"
 #include "semantic.h"
 #include "hash.h"
 #include "parser.tab.h"
@@ -85,7 +85,7 @@ void check_parameters(StackNode *global_scope, hash_element *stored_fun, node_t 
 {
     int call_args = 0;
     cont_call_args(param_call, &call_args);
-    hash_element* function_declared = hash_search(global_scope, stored_fun->name);
+    hash_element* function_declared = hash_search(global_scope, stored_fun->name, true);
     if (function_declared->args_n != call_args)
     {
         print_ERR_NUM_ARGS(stored_fun, function_declared->args_n, call_args);
@@ -93,14 +93,14 @@ void check_parameters(StackNode *global_scope, hash_element *stored_fun, node_t 
     ElementList *list = NULL;
     get_param_type_list(param_call, &list);
     // verificar na tabla hash
-    parameter *typedecl = hash_search(global_scope, stored_fun->name)->function_param;
+    parameter *typedecl = hash_search(global_scope, stored_fun->name, true)->function_param;
     for (int i = 0; i < function_declared->args_n; i++)
     {
         hash_element *topel = top_element(list);
         int typecall;
         if (topel->nature < 3)
         {
-            typecall = hash_search(global_scope, topel->name)->type;
+            typecall = hash_search(global_scope, topel->name, true)->type;
         }
         else
         {
@@ -119,7 +119,7 @@ int check_input_output(StackNode *global_scope, hash_element *stored_elem)
         int typecall;
         if (stored_elem->nature < 3)
         {
-            typecall = hash_search(global_scope, stored_elem->name)->type;
+            typecall = hash_search(global_scope, stored_elem->name, true)->type;
         }
         if (typecall == 258 || typecall == 259)
         {
@@ -168,7 +168,7 @@ void store_literal(hash_element **id_stored, lexeme_t *id, int nature)
         aux->type = TK_PR_BOOL;
         break;
     case NAT_CHAR:
-        sprintf(name, "%s", id->val.s);
+        sprintf(name, "%s", id->val.c);
         aux->type = TK_PR_CHAR;
         break;
     case NAT_STR:
@@ -240,7 +240,7 @@ hash_element *store_lit(lexeme_t *lit, int node_type)
         element->type = TK_PR_BOOL;
         break;
     case NAT_CHAR:
-        sprintf(name, "%s", lit->val.s);
+        sprintf(name, "%s", lit->val.c);
         element->type = TK_PR_CHAR;
         break;
     case NAT_STR:
@@ -266,18 +266,22 @@ int check_exp_type(ElementList* exp_list, StackNode* stack){
     if(exp_list != NULL){
     element = pop_element(&exp_list);
     first_name = element->name;
-    first_type = hash_search(stack, element->name)->type;
+    first_type = hash_search(stack, element->name, true)->type;
     type_return = first_type;
     
     }
     while (!isEmpty_stack_list(exp_list))
         {
             element = pop_element(&exp_list);
-            sec_type = hash_search(stack, element->name)->type;
+            sec_type = hash_search(stack, element->name, true)->type;
             if (first_type == TK_PR_INT || first_type == TK_PR_FLOAT || first_type == TK_PR_BOOL){
                 if(sec_type >260){
                     // tipo incopativel char ou string
-                    print_ERR_WRONG_EXP_TYPES(element->line,first_name,first_type, element->name,sec_type);
+                    if(sec_type == TK_PR_STRING)
+                    print_ERR_STRING_TO_X(element->line, element->name, first_type);
+                    if(sec_type == TK_PR_CHAR)
+                    print_ERR_CHAR_TO_X(element->line, element->name, first_type);
+                    //print_ERR_WRONG_EXP_TYPES(element->line,first_name,first_type, element->name,sec_type);
                 }
                 else{
                     if(sec_type == TK_PR_FLOAT && type_return != TK_PR_FLOAT){
@@ -307,21 +311,4 @@ int check_exp_type(ElementList* exp_list, StackNode* stack){
             
         }
     return type_return;
-}
-
-lexeme_t* get_node_name(node_t *node, lexeme_t **lex)
-{
-    if (node == NULL)
-    {
-        return 0;
-    }
-    else
-    {
-        for (int i = 0; i < MAX_CHILDREN; i++)
-        {
-            node_t *child = node->children[i];
-            get_node_name(child, lex);
-        }
-        *lex = node->lex_value;
-    }
 }

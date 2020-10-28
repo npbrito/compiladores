@@ -5,7 +5,7 @@
 #define MISC_H_
 
 #include "hash.h"
-#include "list.h"
+#include "element_stack.h"
 
 /* Other functions that help store values. */
 
@@ -56,7 +56,5 @@ int get_param_type_list(node_t* node, ElementList** root);
 hash_element *store_lit(lexeme_t *, int );
 
 int check_exp_type(ElementList*, StackNode*);
-
-lexeme_t* get_node_name(node_t *node, lexeme_t **name);
 
 #endif // MISC_H_

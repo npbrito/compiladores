@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "list.h"
+#include "element_stack.h"
 #include "hash.h"
 
 // Stack to create lists of variables

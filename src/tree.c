@@ -55,7 +55,7 @@ void destroy_node(node_t *tree)
 void destroy_lexeme(lexeme_t *lex_value)
 {
     if (!lex_value) return;
-    if (lex_value->type == TK_LIT_STRING || lex_value->type == TK_LIT_CHAR) {
+    if (lex_value->type == TK_LIT_STRING) {
         free(lex_value->val.s);
         lex_value->val.s = NULL;
     }
@@ -75,7 +75,7 @@ static void print_node(node_t *tree, bool relation)
         case TK_LIT_FLOAT:   printf("%f", lex->val.f); break;
         case TK_LIT_FALSE:   printf("false"); break;
         case TK_LIT_TRUE:    printf("true"); break;
-        case TK_LIT_CHAR:
+        case TK_LIT_CHAR:   printf("%s", lex->val.c); break;
         case TK_LIT_STRING:  printf("%s", lex->val.s); break;
         case TYPE_FUNC_CALL: printf("call ");
         default:             printf("%s", lex->name); break;

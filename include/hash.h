@@ -71,7 +71,7 @@ HashTable* hash_create();
 void hash_insert(HashTable**, hash_element*, int type);
 
 /* Search if element exist in a table */
-hash_element* hash_search(StackNode *stack, char *name);
+hash_element* hash_search(StackNode *stack, char *name, bool isglobal);
 
 /* Print a entire hash table */
 void hash_print(HashTable*);

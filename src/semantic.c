@@ -44,10 +44,12 @@ void print_ERR_VARIABLE(hash_element *id, int previous_nature)
     switch (previous_nature)
     {
     case NAT_VET:
-        fprintf(stderr, "Line %d \033[1;31m ERR_VARIABLE:\033[0m identifier \033[1m'%s'\033[0m used as\033[1;31m VARIABLE\033[0m but was delcared as\033[1;32m VECTOR.\033[0m\n", id->line, id->name);
+        fprintf(stderr, "Line %d \033[1;31m ERR_VECTOR:\033[0m identifier \033[1m'%s'\033[0m used as\033[1;31m VARIABLE\033[0m but was delcared as\033[1;32m VECTOR.\033[0m\n", id->line, id->name);
+        exit(ERR_VECTOR);
         break;
     case NAT_FUN:
-        fprintf(stderr, "Line %d \033[1;31m ERR_VARIABLE:\033[0m identifier \033[1m'%s'\033[0m used as\033[1;31m VARIABLE\033[0m but was delcared as\033[1;32m FUNCTION.\033[0m\n", id->line, id->name);
+        fprintf(stderr, "Line %d \033[1;31m ERR_FUNCTION:\033[0m identifier \033[1m'%s'\033[0m used as\033[1;31m VARIABLE\033[0m but was delcared as\033[1;32m FUNCTION.\033[0m\n", id->line, id->name);
+        exit(ERR_FUNCTION);
         break;
     }
     exit(ERR_VARIABLE);
@@ -57,10 +59,12 @@ void print_ERR_VECTOR(hash_element *id, int previous_nature)
     switch (previous_nature)
     {
     case NAT_VAR:
-        fprintf(stderr, "Line %d \033[1;31m ERR_VECTOR:\033[0m identifier \033[1m'%s'\033[0m used as\033[1;31m VECTOR\033[0m but was delcared as\033[1;32m VARIABLE.\033[0m\n", id->line, id->name);
+        fprintf(stderr, "Line %d \033[1;31m ERR_VARIABLE:\033[0m identifier \033[1m'%s'\033[0m used as\033[1;31m VECTOR\033[0m but was delcared as\033[1;32m VARIABLE.\033[0m\n", id->line, id->name);
+        exit(ERR_VARIABLE);
         break;
     case NAT_FUN:
-        fprintf(stderr, "Line %d \033[1;31m ERR_VECTOR:\033[0m identifier \033[1m'%s'\033[0m used as\033[1;31m VECTOR\033[0m but was delcared as\033[1;32m FUNCTION.\033[0m\n", id->line, id->name);
+        fprintf(stderr, "Line %d \033[1;31m ERR_FUNCTION:\033[0m identifier \033[1m'%s'\033[0m used as\033[1;31m VECTOR\033[0m but was delcared as\033[1;32m FUNCTION.\033[0m\n", id->line, id->name);
+        exit(ERR_FUNCTION);
         break;
     }
     exit(ERR_VECTOR);
@@ -70,13 +74,15 @@ void print_ERR_FUNCTION(hash_element *id, int previous_nature)
     switch (previous_nature)
     {
     case NAT_VET:
-        fprintf(stderr, "Line %d \033[1;31m ERR_FUNCTION:\033[0m identifier \033[1m'%s'\033[0m used as\033[1;31m FUNCTION\033[0m but was delcared as\033[1;32m VECTOR.\033[0m\n", id->line, id->name);
+        fprintf(stderr, "Line %d \033[1;31m ERR_VECTOR:\033[0m identifier \033[1m'%s'\033[0m used as\033[1;31m FUNCTION\033[0m but was delcared as\033[1;32m VECTOR.\033[0m\n", id->line, id->name);
+        exit(ERR_VECTOR);
         break;
     case NAT_VAR:
-        fprintf(stderr, "Line %d \033[1;31m ERR_FUNCTION:\033[0m identifier \033[1m'%s'\033[0m used as\033[1;31m FUNCTION\033[0m but was delcared as\033[1;32m VARIABLE.\033[0m\n", id->line, id->name);
+        fprintf(stderr, "Line %d \033[1;31m ERR_VARIABLE:\033[0m identifier \033[1m'%s'\033[0m used as\033[1;31m FUNCTION\033[0m but was delcared as\033[1;32m VARIABLE.\033[0m\n", id->line, id->name);
+        exit(ERR_VARIABLE);
         break;
     }
-    exit(ERR_FUNCTION);
+    
 }
 
 void print_ERR_NUM_ARGS(hash_element *id, int args_decl, int args_call)
@@ -132,13 +138,13 @@ void print_ERR_WRONG_ASS_TYPE(int line, int type, int wrongtype){
     exit(ERR_WRONG_TYPE);
 }
 
-void print_ERR_CHAR_TO_X(lexeme_t* var, int wrongtype){
-    fprintf(stderr, "Line %d \033[1;31mERR_CHAR_TO_X:\033[0m \033[1m'%s'\033[0m can not be converted to \033[1;31m%s\033[0m because is a \033[1;32mchar\033[0m.\n" ,var->line,var->name ,args_type(wrongtype));
+void print_ERR_CHAR_TO_X(int line, char *name, int wrongtype){
+    fprintf(stderr, "Line %d \033[1;31mERR_CHAR_TO_X:\033[0m \033[1m'%s'\033[0m can not be converted to \033[1;31m%s\033[0m because is a \033[1;32mchar\033[0m.\n" ,line,name ,args_type(wrongtype));
     exit(ERR_CHAR_TO_X);
 }
 
-void print_ERR_STRING_TO_X(lexeme_t* var, int wrongtype){
-    fprintf(stderr, "Line %d \033[1;31mERR_STRING_TO_X:\033[0m \033[1m'%s'\033[0m can not be converted to \033[1;31m%s\033[0m because is a \033[1;32mstring\033[0m.\n" ,var->line,var->name ,args_type(wrongtype));
+void print_ERR_STRING_TO_X(int line, char *name, int wrongtype){
+    fprintf(stderr, "Line %d \033[1;31mERR_STRING_TO_X:\033[0m \033[1m'%s'\033[0m can not be converted to \033[1;31m%s\033[0m because is a \033[1;32mstring\033[0m.\n" ,line,name ,args_type(wrongtype));
     exit(ERR_STRING_TO_X);
 }
 

@@ -10,7 +10,7 @@
 #include <string.h>
 #include "tree.h"
 #include "hash.h"
-#include "list.h"
+#include "element_stack.h"
 #include "misc.h"
 #include "semantic.h"
 
@@ -23,6 +23,7 @@ StackNode* global_scope = NULL;
 ElementList* var_list = NULL;
 ElementList* param_list = NULL;
 hash_element* stored_element = NULL;
+hash_element* stored_IDArray = NULL;
 hash_element* stored_literal = NULL;
 hash_element* stored_fundecl = NULL;
 hash_element* stored_fun = NULL;
@@ -189,7 +190,8 @@ ID: TK_IDENTIFICADOR { store_identificador(&stored_element, $1);
   ;
 IDArray: ID              { $$ = $1;  
                          store_nature(&stored_element, NAT_VAR);
-                            hash_element* element = hash_search(global_scope, stored_element->name);
+                            hash_element* element = hash_search(global_scope, stored_element->name, true);
+                             stored_IDArray = stored_element;
                             if(element == NULL){
                                 print_ERR_UNDECLARED(stored_element);
                             }
@@ -204,7 +206,8 @@ IDArray: ID              { $$ = $1;
                             replace_name($2, "[]");
                             $$ = create_node(NAT_VET,$2, 2, $1, $3);
                             store_nature(&stored_element, NAT_VET);
-                            hash_element * element = hash_search(global_scope, stored_element->name);
+                            hash_element * element = hash_search(global_scope, stored_element->name, true);
+                            stored_IDArray = stored_element;
                             if(element == NULL){
                                 print_ERR_UNDECLARED(stored_element);
                             }
@@ -287,7 +290,7 @@ FuncHead: TypeStatic FunID '(' ParamsDecl ')'  {
                                                     stored_fundecl = stored_fun;
                                                     store_function_elem(&stored_fun);
                                                     HashTable * table = top(global_scope);
-                                                    hash_element* element = hash_search(global_scope, stored_fun->name);
+                                                    hash_element* element = hash_search(global_scope, stored_fun->name, true);
                                                     if (element == NULL){
                                                     store_param(&stored_fun,param_list);
                                                     hash_insert(&table, stored_fun, $1);
@@ -314,7 +317,7 @@ ParamDecl: TypeConst TK_IDENTIFICADOR { store_identificador(&stored_element,$2);
 /* Function call */
 FuncCall: FunID '(' ParamsCall ')' { 
                                 store_nature(&stored_fun, NAT_FUN);
-                                hash_element * element = hash_search(global_scope, stored_fun->name);                               
+                                hash_element * element = hash_search(global_scope, stored_fun->name, true);                               
                                 if(element == NULL){
                                 print_ERR_UNDECLARED(stored_fun);
                                 }
@@ -340,7 +343,7 @@ ParamCallList: Expr                   { $$ = $1;               }
 GlobalVarDecl: TypeStatic GlobalVarList {  HashTable * table = top(global_scope);
                                             while(!isEmpty_stack_list(var_list)){
                                             hash_element* var = pop_element(&var_list);
-                                            hash_element* element = hash_search(global_scope, var->name);
+                                            hash_element* element = hash_search(global_scope, var->name, true);
                                             if(element == NULL){
                                             hash_insert(&table, var, $1);
                                             }
@@ -367,7 +370,7 @@ LocalVarDecl:
              HashTable * table = top(global_scope);
                                         while(!isEmpty_stack_list(var_list)){
                                             hash_element* var = pop_element(&var_list);
-                                            hash_element * element = hash_search(global_scope, var->name);
+                                            hash_element * element = hash_search(global_scope, var->name, false);
                                             if(element == NULL){
                                             hash_insert(&table, var, $1);}
                                             else{
@@ -460,13 +463,13 @@ Cmd: LocalVarDecl            { $$ = $1;                         }
                               int ok = check_input_output(global_scope, stored_element);
                               if(ok != -1)
                               {
-                                  print_ERR_WRONG_PAR_OUTPUT(stored_element, ok);
+                                  print_ERR_WRONG_PAR_INPUT(stored_element, ok);
                               }}
    | TK_PR_OUTPUT IDArray    { $$ = create_node(OUT,$1, 1, $2);     
                                 int ok = check_input_output(global_scope, stored_element);
                               if(ok != -1)
                               {
-                                  print_ERR_WRONG_PAR_INPUT(stored_element, ok);
+                                  print_ERR_WRONG_PAR_OUTPUT(stored_element, ok);
                               }}
    | TK_PR_OUTPUT Lit        { $$ = create_node(OUT,$1, 1, $2);     }
    | CmdBlock                { $$ = $1;                         }
@@ -478,6 +481,7 @@ Cmd: LocalVarDecl            { $$ = $1;                         }
                                 int type =  check_exp_type(param_list, global_scope);
                                 param_list = NULL;
                                 if(type != stored_fundecl->type){
+                                    if(!((type <=260) && (stored_fundecl->type <=260)))
                                     print_ERR_WRONG_PAR_RETURN(stored_fundecl,type, line);
                                 }}
    | TK_PR_BREAK             { $$ = create_node(BREAK,$1, 0);         }
@@ -496,22 +500,23 @@ CmdSeq: %empty          { $$ = NULL;                                   }
  /*Assignment */
 Assignment: IDArray '=' Expr { 
     $$ = create_node(ASS,$2, 2, $1, $3); 
-    lexeme_t* id;
-    get_node_name($1, &id);
-    int IDtype = hash_search(global_scope, id->name)->type;
+    int IDtype = hash_search(global_scope, stored_IDArray->name, true)->type;
     int exp_type = check_exp_type(param_list, global_scope);
-        if(IDtype == TK_PR_STRING && exp_type != TK_PR_STRING){
-            print_ERR_STRING_TO_X(id, exp_type);
-    }
+    if(IDtype == TK_PR_STRING && exp_type != TK_PR_STRING){
+            print_ERR_STRING_TO_X(stored_IDArray->line, stored_IDArray->name, exp_type);}
+    else{
+        if(IDtype != TK_PR_STRING && exp_type == TK_PR_STRING){
+            print_ERR_STRING_TO_X(stored_IDArray->line, stored_IDArray->name, exp_type);}
     else{
         if(IDtype == TK_PR_CHAR && exp_type != TK_PR_CHAR){
-            print_ERR_CHAR_TO_X(id, exp_type);
+            print_ERR_CHAR_TO_X(stored_IDArray->line, stored_IDArray->name, exp_type);
         }
     else{
-             if(!((IDtype <=260)  && (exp_type <=260))){
-            print_ERR_WRONG_ASS_TYPE(stored_element->line, IDtype,exp_type);
-        }
-    }
+             if(IDtype != exp_type){
+             if(!((IDtype <=260) && (exp_type <=260))){
+                print_ERR_WRONG_ASS_TYPE(stored_element->line, IDtype,exp_type);
+        }}
+    }}
     }
     param_list = NULL;
 };

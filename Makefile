@@ -12,8 +12,8 @@ DIR=include/
 FILES=\
 		src/main.c \
 		src/hash.c \
-		src/list.c \
 		src/misc.c \
+		src/element_stack.c \
 		src/semantic.c \
 		src/tree.c 
 

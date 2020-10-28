@@ -151,12 +151,14 @@ void hash_insert(HashTable **root, hash_element *newElement, int type)
     *root = table;
 }
 
-hash_element* hash_search(StackNode *stack, char *name)
+hash_element* hash_search(StackNode *stack, char *name, bool isglobal)
 {
     // primeiro procurano escopo global
-    HashTable *table = bottom(stack);
+    HashTable *table = NULL;
     int index = calc_index(name);
     int elements_searched = 0;
+    if(isglobal){
+    table = bottom(stack);
     while (table[index].value != NULL && elements_searched < HASH_SIZE)
     {
         if (strcmp(name, table[index].value->name) == 0)
@@ -170,6 +172,7 @@ hash_element* hash_search(StackNode *stack, char *name)
             index = 0;
         }
         elements_searched++;
+    }
     }
     // depois procura no escopo local
     table = top(stack);

@@ -11,6 +11,7 @@ union Literal {
     int d;
     float f;
     bool b;
+    char *c;
     char *s;
 };
 
