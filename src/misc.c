@@ -268,7 +268,6 @@ int check_exp_type(ElementList* exp_list, StackNode* stack){
     first_name = element->name;
     first_type = hash_search(stack, element->name, true)->type;
     type_return = first_type;
-    
     }
     while (!isEmpty_stack_list(exp_list))
         {
@@ -278,9 +277,10 @@ int check_exp_type(ElementList* exp_list, StackNode* stack){
                 if(sec_type >260){
                     // tipo incopativel char ou string
                     if(sec_type == TK_PR_STRING)
-                    print_ERR_STRING_TO_X(element->line, element->name, first_type);
-                    if(sec_type == TK_PR_CHAR)
-                    print_ERR_CHAR_TO_X(element->line, element->name, first_type);
+                    {
+                    print_ERR_STRING_TO_X(element->line, element->name, first_type);}
+                    if(sec_type == TK_PR_CHAR){ 
+                    print_ERR_CHAR_TO_X(element->line, element->name, first_type);}
                     //print_ERR_WRONG_EXP_TYPES(element->line,first_name,first_type, element->name,sec_type);
                 }
                 else{

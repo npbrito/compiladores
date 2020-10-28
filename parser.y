@@ -208,6 +208,7 @@ IDArray: ID              { $$ = $1;
                             store_nature(&stored_element, NAT_VET);
                             hash_element * element = hash_search(global_scope, stored_element->name, true);
                             stored_IDArray = stored_element;
+                            pop_element(&param_list);
                             if(element == NULL){
                                 print_ERR_UNDECLARED(stored_element);
                             }
@@ -249,7 +250,7 @@ Lit: TK_LIT_INT    { $$ = create_node(NAT_INT,$1, 0);
    | TK_LIT_STRING { $$ = create_node(NAT_STR,$1, 0);
                     store_literal(&stored_literal, $1, NAT_STR);
                     HashTable * table = top(global_scope);
-                    hash_insert(&table, stored_literal,TK_PR_CHAR);
+                    hash_insert(&table, stored_literal,TK_PR_STRING);
                     }
    ;
 Int: TK_LIT_INT { $$ = create_node(NAT_INT,$1, 0); }
@@ -421,7 +422,7 @@ Expr: UnaryExpr              { $$ = $1;                             }
                                $$ = create_node(EXP,$2, 3, $1, $3, $5); }
     | '(' Expr ')'           { $$ = $2;                             }
     ;
-UnaryExpr: IDArray  { $$ = $1; push_exp(&param_list, stored_element);}
+UnaryExpr: IDArray  { $$ = $1; push_exp(&param_list, stored_IDArray);}
          | Lit      { $$ = $1; push_exp(&param_list, stored_literal);}
          | FuncCall { $$ = $1; push_exp(&param_list, stored_fun);}
          ;
@@ -503,7 +504,8 @@ Assignment: IDArray '=' Expr {
     int IDtype = hash_search(global_scope, stored_IDArray->name, true)->type;
     int exp_type = check_exp_type(param_list, global_scope);
     if(IDtype == TK_PR_STRING && exp_type != TK_PR_STRING){
-            print_ERR_STRING_TO_X(stored_IDArray->line, stored_IDArray->name, exp_type);}
+            print_ERR_STRING_TO_X(stored_IDArray->line, stored_IDArray->name, exp_type);  }
+            
     else{
         if(IDtype != TK_PR_STRING && exp_type == TK_PR_STRING){
             print_ERR_STRING_TO_X(stored_IDArray->line, stored_IDArray->name, exp_type);}

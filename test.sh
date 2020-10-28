@@ -5,8 +5,8 @@
 #  Date  ) 2020-10-14
 # ------------------------------------------------ 
 
-filesk=" 05 14 39 59 60 61 71 74 85 97 98"
-filesm="01 03 08 09" 
+filesk=" 39 59 60 71 74 85 97 98"
+filesm="01 03 09" 
 
 make > /dev/null
 
@@ -16,12 +16,6 @@ mkdir run
 for k in $filesk; do
 
     case $k in
-        05) 
-        echo "kal$k: PASS"
-        ;;
-        14) 
-        echo "kal$k: PASS"
-        ;;
         39) 
         echo "kal$k: PASS"
         ;;
@@ -30,9 +24,6 @@ for k in $filesk; do
         ;;
         60) 
         echo "kal$k: ERR_STRING_SIZE"
-        ;;
-        61) 
-        echo "kal$k: PASS"
         ;;
         71) 
         echo "kal$k: PASS"
@@ -56,7 +47,17 @@ done
 
 for m in $filesm; do
 
-    echo "mao$m"
+    case $m in
+        01) 
+        echo "mao$m: ERR_WRONG_TYPE"
+        ;;
+        03) 
+        echo "mao$m: ERR_WRONG_TYPE"
+        ;;
+        09) 
+        echo "mao$m: ERR_WRONG_TYPE"
+        ;;
+    esac
     ./etapa4 < tests/mao$m > run/T_1_$s
 
 done

@@ -126,7 +126,6 @@ void hash_insert(HashTable **root, hash_element *newElement, int type)
         table[index].key = index;
         table[index].value = newElement;
         table[index].value->type = type;
-
         if (newElement->nature == NAT_VET)
         {
             table[index].value->type_size = newElement->vet_size * calc_type_size(type);
